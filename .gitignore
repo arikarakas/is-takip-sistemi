@@ -1,0 +1,43 @@
+# Ortam
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Loglar
+*.log
+logs/
+
+# IDE / OS
+.idea/
+.vscode/
+.cursorignore
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+postgres_data/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/vite
