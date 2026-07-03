@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useActionState } from 'react';
 import { API_ROOT, getAuthHeaders, parseApiError } from '../../utils/api';
+import SplitText from './SplitText';
 
 const USERS_API = `${API_ROOT}/users`;
 
@@ -177,7 +178,21 @@ function UserManagement({ currentUser }) {
         <>
             <header className="mb-8">
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">Kullanıcı Yönetimi</h1>
+                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                    <SplitText
+                        text="Kullanıcı Yönetimi"
+                        delay={50}
+                        duration={1.25}
+                        ease="power3.out"
+                        splitType="chars"
+                        from={{ opacity: 0, y: 40 }}
+                        to={{ opacity: 1, y: 0 }}
+                        threshold={0.1}
+                        rootMargin="-100px"
+                        textAlign="center"
+                        showCallback
+                    />
+                    </h1>
                     <button
                         type="button"
                         onClick={() => {

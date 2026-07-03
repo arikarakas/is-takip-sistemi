@@ -1,3 +1,5 @@
+import ShinyText from './ShinyText';
+
 function ChevronIcon({ className }) {
     return (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -51,11 +53,19 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                 <div className={`p-6 flex-1 flex flex-col ${isOpen ? '' : 'md:px-3 md:items-center'}`}>
                     <div className={`flex items-center mb-8 gap-2 ${isOpen ? 'justify-between' : 'md:justify-center'}`}>
                         <h2
-                            className={`text-xl font-black tracking-tight text-blue-400 whitespace-nowrap transition-all duration-300 ${
+                            className={`text-xl font-black tracking-tight whitespace-nowrap transition-all duration-300 ${
                                 isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'
                             }`}
                         >
-                            İş Takip Paneli
+                            <ShinyText
+                                text="İş Takip Paneli"
+                                speed={2.5}
+                                color="#60a5fa"
+                                shineColor="#ffffff"
+                                spread={120}
+                                direction="left"
+                                className="text-xl font-black tracking-tight"
+                            />
                         </h2>
                         <button
                             type="button"

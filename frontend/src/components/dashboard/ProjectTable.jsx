@@ -50,7 +50,7 @@ function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) 
                             ))}
                         </colgroup>
                         <thead className="sticky top-0 z-10">
-                            <tr className="bg-slate-50/95 backdrop-blur border-b border-slate-200 text-[11px] font-bold uppercase tracking-wide text-slate-500 shadow-[0_1px_0_rgba(15,23,42,0.06)]">
+                            <tr className="bg-slate-50/95 backdrop-blur border-b border-slate-200 text-[12px] font-bold uppercase tracking-wide text-slate-500 shadow-[0_1px_0_rgba(15,23,42,0.06)]">
                                 {PROJECT_TABLE_COLUMNS.map((col) => {
                                     const isCurrentSort = sortKey === col.key;
                                     return (

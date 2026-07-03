@@ -1,10 +1,19 @@
 import { STATUS_STYLES } from '../../constants/projects';
 
+function isProjectCompleted(project) {
+    return (project.durum || '').trim().toLocaleUpperCase('tr-TR') === 'TAMAMLANDI';
+}
+
 function ProjectCard({ project, onClick }) {
+    const isCompleted = isProjectCompleted(project);
     return (
         <div 
             onClick={onClick}
-            className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition">
+            className={`p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition ${
+                isCompleted
+                    ? 'bg-emerald-100 border border-emerald-300 hover:bg-emerald-50'
+                    : 'bg-white border border-slate-100 hover:bg-slate-50 hover:border-slate-300'
+            }`}>
             <div>
                 <div className="flex justify-between items-start gap-2">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_STYLES[project.durum] || STATUS_STYLES.BEKLEMEDE}`}>
@@ -14,7 +23,7 @@ function ProjectCard({ project, onClick }) {
                 <h3 className="text-lg font-bold text-slate-800 mt-3 tracking-tight">{project.title}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">{project.notlar}</p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-50 flex justify-end">
+            <div className={`mt-6 pt-4 border-t flex justify-end ${isCompleted ? 'border-emerald-100/80' : 'border-slate-50'}`}>
                 <button className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Detayları Yönet →</button>
             </div>
         </div>

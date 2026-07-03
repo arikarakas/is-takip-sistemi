@@ -10,6 +10,7 @@ import UserManagement from '../components/dashboard/UserManagement';
 import { ACILIYET_DEGERI } from '../constants/projects';
 import { matchesTimeFilter, matchesPriorityFilter, getPriorityFilterOptions } from '../utils/projectFilters';
 import { API_ROOT, fetchCurrentUser, getAuthHeaders, parseApiError } from '../utils/api';
+import SplitText from "../components/dashboard/SplitText";
 
 const API_BASE = `${API_ROOT}/projects`;
 
@@ -405,7 +406,21 @@ function Dashboard({ onLogout }) {
                             >
                                 <MenuIcon className="w-6 h-6" />
                             </button>
-                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Tüm Projeler ve İşler</h1>
+                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                                <SplitText
+                                    text="Tüm Projeler ve İşler"
+                                    delay={50}
+                                    duration={1.25}
+                                    ease="power3.out"
+                                    splitType="chars"
+                                    from={{ opacity: 0, y: 40 }}
+                                    to={{ opacity: 1, y: 0 }}
+                                    threshold={0.1}
+                                    rootMargin="-100px"
+                                    textAlign="center"
+                                    showCallback
+                                />
+                            </h1>
                         </div>
                         <div className="flex items-center gap-4 self-start lg:self-auto">
                             <div className="max-w-md w-60">
@@ -454,7 +469,7 @@ function Dashboard({ onLogout }) {
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-4">
                         <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 select-none w-fit">
-                            {['HEPSİ', 'BEKLEMEDE', 'DEVAM EDİYOR', 'TAMAMLANDI'].map((status) => {
+                            {['HEPSİ', 'AÇIK', 'BEKLEMEDE', 'DEVAM EDİYOR', 'TAMAMLANDI'].map((status) => {
                                 const isActive = statusFilter === status;
 
                                 return (
