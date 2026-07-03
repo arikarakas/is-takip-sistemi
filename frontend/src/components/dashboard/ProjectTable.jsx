@@ -5,13 +5,15 @@ import {
 } from '../../constants/projects';
 import ProjectCell from './ProjectCell';
 
-function getStickyCellClass(key, { isHeader = false, isEvenRow = false } = {}) {
+function getStickyCellClass(key, { isHeader = false, isEvenRow = false, isCompleted = false } = {}) {
     if (!(key in STICKY_COLUMN_OFFSETS)) return '';
     const bg = isHeader
         ? 'bg-slate-50'
-        : isEvenRow
-            ? 'bg-slate-50/40 group-hover:bg-slate-50/90'
-            : 'bg-white group-hover:bg-slate-50/90';
+        : isCompleted
+            ? 'bg-emerald-50/60 group-hover:bg-emerald-50'
+            : isEvenRow
+                ? 'bg-slate-50/40 group-hover:bg-slate-50/90'
+                : 'bg-white group-hover:bg-slate-50/90';
     const border = key === 'title' ? 'border-r border-slate-200/80 shadow-[4px_0_8px_-4px_rgba(15,23,42,0.08)]' : '';
     return `sticky z-[1] ${bg} ${border} ${isHeader ? 'z-[2]' : ''}`;
 }
@@ -19,6 +21,10 @@ function getStickyCellClass(key, { isHeader = false, isEvenRow = false } = {}) {
 function getStickyStyle(key) {
     if (!(key in STICKY_COLUMN_OFFSETS)) return undefined;
     return { left: STICKY_COLUMN_OFFSETS[key] };
+}
+
+function isProjectCompleted(project) {
+    return (project.durum || '').trim().toLocaleUpperCase('tr-TR') === 'TAMAMLANDI';
 }
 
 function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) {
@@ -68,23 +74,32 @@ function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) 
                             </tr>
                         </thead>
                         <tbody>
-                            {projects.map((project, rowIndex) => (
+                            {projects.map((project, rowIndex) => {
+                                const isCompleted = isProjectCompleted(project);
+                                return (
                                 <tr
                                     key={project.id}
                                     onClick={() => onRowClick(project)}
-                                    className={`group border-b border-slate-100/80 transition-colors hover:bg-slate-50/90 cursor-pointer ${rowIndex % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'}`}
+                                    className={`group border-b border-slate-100/80 transition-colors cursor-pointer ${
+                                        isCompleted
+                                            ? 'bg-emerald-100/90 hover:bg-emerald-50'
+                                            : rowIndex % 2 === 1
+                                                ? 'bg-slate-50/40 hover:bg-slate-50/90'
+                                                : 'bg-white hover:bg-slate-50/90'
+                                    }`}
                                 >
                                     {PROJECT_TABLE_COLUMNS.map((col) => (
                                         <td
                                             key={col.key}
                                             style={getStickyStyle(col.key)}
-                                            className={`py-3 px-5 align-middle text-sm text-slate-600 ${getStickyCellClass(col.key, { isEvenRow: rowIndex % 2 === 1 })} ${col.key === 'notlar' ? 'max-w-0' : ''}`}
+                                            className={`py-3 px-5 align-middle text-sm text-slate-600 ${getStickyCellClass(col.key, { isEvenRow: rowIndex % 2 === 1, isCompleted })} ${col.key === 'notlar' ? 'max-w-0' : ''}`}
                                         >
                                             <ProjectCell project={project} columnKey={col.key} />
                                         </td>
                                     ))}
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
