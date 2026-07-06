@@ -3,6 +3,7 @@ from app.api.deps import ProjectServiceDep, CurrentUserDep
 from app.models.project import ProjectStatus
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectImportResponse
 from app.services.project_import import ImportParseError, parse_import_file
+from app.schemas.project_change import ProjectChangeResponse
 
 router = APIRouter()
 
@@ -79,6 +80,11 @@ async def import_projects_from_file(
         )
 
     return await service.import_projects(rows, detected_header_row, errors)
+
+@router.get("/changes/recent", response_model=list[ProjectChangeResponse])
+async def read_recent_project_changes(service: ProjectServiceDep, current_user: CurrentUserDep, limit: int = Query(30, ge=1, le=100)):
+    """Son proje değişikliklerini listeler"""
+    return await service.get_recent_changes(limit=limit)
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def read_project_by_id(

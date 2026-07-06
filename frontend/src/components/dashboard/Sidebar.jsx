@@ -95,6 +95,22 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                 Proje Listesi
                             </span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => onNavigate?.('activity')}
+                            title="Son Değişiklikler"
+                            className={`w-full flex items-center gap-3 py-2.5 rounded-xl font-medium transition-all cursor-pointer ${
+                                isOpen ? 'px-4' : 'md:px-0 md:justify-center md:w-full'
+                            } ${
+                                activeView === 'activity'
+                                    ? 'bg-slate-800 text-white'
+                                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                            }`}>
+                            <span className="text-lg shrink-0" aria-hidden="true">🕘</span>
+                            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
+                                Son Değişiklikler
+                            </span>
+                        </button>
 
                         {isAdmin && (
                             <button

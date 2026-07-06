@@ -11,6 +11,7 @@ import { ACILIYET_DEGERI } from '../constants/projects';
 import { matchesTimeFilter, matchesPriorityFilter, getPriorityFilterOptions } from '../utils/projectFilters';
 import { API_ROOT, fetchCurrentUser, getAuthHeaders, parseApiError } from '../utils/api';
 import SplitText from "../components/dashboard/SplitText";
+import RecentChangesTable from '../components/dashboard/RecentChangesTable';
 
 const API_BASE = `${API_ROOT}/projects`;
 
@@ -213,6 +214,9 @@ function Dashboard({ onLogout }) {
     const [isTimeFilterActive, setIsTimeFilterActive] = useState(false);
     const [timeSliderStep, setTimeSliderStep] = useState(2);
     const [priorityFilter, setPriorityFilter] = useState('TÜMÜ');
+    const [recentChanges, setRecentChanges] = useState([]);
+    const [changesLoading, setChangesLoading] = useState(false);
+    const [changesError, setChangesError] = useState(null);
 
     async function loadProjects() {
         try {
@@ -224,6 +228,31 @@ function Dashboard({ onLogout }) {
             setError(err.message);
         } finally {
             setIsLoading(false);
+        }
+    }
+
+    async function loadRecentChanges() {
+        setChangesLoading(true);
+        setChangesError(null);
+    
+        try {
+            const response = await fetch(`${API_ROOT}/projects/changes/recent?limit=30`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+                cache: 'no-store',
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(parseApiError(errorData.detail, 'Değişiklikler yüklenemedi.'));
+            }
+    
+            const data = await response.json();
+            setRecentChanges(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setChangesError(err.message);
+        } finally {
+            setChangesLoading(false);
         }
     }
 
@@ -272,6 +301,12 @@ function Dashboard({ onLogout }) {
             setPriorityFilter('TÜMÜ');
         }
     }, [priorityOptions, priorityFilter]);
+
+    useEffect(() => {
+        if (activeView === 'activity') {
+            loadRecentChanges();
+        }
+    }, [activeView]);
 
     async function handleDeleteProject(project) {
         const confirmed = window.confirm(`"${project.title}" projesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`);
@@ -393,6 +428,32 @@ function Dashboard({ onLogout }) {
             <main className="flex-1 min-w-0 p-6 md:p-10 overflow-x-hidden">
                 {activeView === 'users' ? (
                     <UserManagement currentUser={currentUser} />
+                ) : activeView === 'activity' ? (
+                    <>
+                        <header className="mb-8">
+                            <h1 className="text-2xl font-black text-slate-800">
+                            <SplitText
+                                    text="Son Değişiklikler"
+                                    delay={50}
+                                    duration={1.25}
+                                    ease="power3.out"
+                                    splitType="chars"
+                                    from={{ opacity: 0, y: 40 }}
+                                    to={{ opacity: 1, y: 0 }}
+                                    threshold={0.1}
+                                    rootMargin="-100px"
+                                    textAlign="center"
+                                    showCallback
+                                />
+                            </h1>
+                            <p className="text-slate-500 mt-1">Sistemdeki son 30 proje hareketi</p>
+                        </header>
+                        <RecentChangesTable
+                            changes={recentChanges}
+                            isLoading={changesLoading}
+                            error={changesError}
+                        />
+                    </>
                 ) : (
                     <>
                 <header className="mb-8">

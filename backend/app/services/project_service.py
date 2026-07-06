@@ -4,6 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.project import Project, ProjectStatus
 from app.repositories.project_repo import ProjectRepository
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectImportRow, ProjectImportResponse, ImportRowError
+from datetime import date, datetime
+import enum
+from app.models.project_changes import ProjectActions, ProjectChange
+from app.repositories.project_change_repo import ProjectChangeRepository
+from app.schemas.project_change import ProjectChangeResponse
 
 def _tamamlanma_for_status(durum: ProjectStatus, manual):
     """Duruma göre tamamlanma yüzdesini belirler."""
@@ -13,9 +18,27 @@ def _tamamlanma_for_status(durum: ProjectStatus, manual):
         return 0
     return manual if manual is not None else 0
 
+def _serialize_change_value(value):
+    if isinstance(value, enum.Enum):
+        return value.value
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    return value
+
+def _build_changes(project, update_data: dict) -> dict:
+    changes = {}
+    for field, new_value in update_data.items():
+        old_value = getattr(project, field)
+        old_serialized = _serialize_change_value(old_value)
+        new_serialized = _serialize_change_value(new_value)
+        if old_serialized != new_serialized:
+            changes[field] = {"old": old_serialized, "new": new_serialized}
+    return changes
+
 class ProjectService:
     def __init__(self, db: AsyncSession) -> None:
         self.repo = ProjectRepository(db)
+        self.change_repo = ProjectChangeRepository(db)
     
     async def create_project(self, data: ProjectCreate, user_id: int):
 
@@ -32,6 +55,9 @@ class ProjectService:
         self.repo.session.add(db_project)
         await self.repo.session.flush()
         await self.repo.session.refresh(db_project)
+
+        await self.change_repo.create(project_id=db_project.id, user_id=user_id, action=ProjectActions.CREATED, changes={"title": db_project.title})
+        
         return db_project
     
     async def get_project_by_id(self, project_id: int):
@@ -62,8 +88,12 @@ class ProjectService:
                 new_durum,
                 update_data.get("tamamlanma", project.tamamlanma),
             )
+        changes = _build_changes(project, update_data)
         project.last_modified_by_id = user_id
-        return await self.repo.update(project, ProjectUpdate(**update_data))
+        updated = await self.repo.update(project, ProjectUpdate(**update_data))
+
+        await self.change_repo.create(project_id=project_id, user_id=user_id, action=ProjectActions.UPDATED, changes=changes or None)
+        return updated
     
     async def delete_project(self, project_id: int) -> None:
         """Projeyi sistemden siler."""
@@ -108,3 +138,23 @@ class ProjectService:
             header_row=header_row,
             errors=errors,
         )
+    
+    async def get_recent_changes(self, limit: int=30) -> list[ProjectChangeResponse]:
+        rows = await self.change_repo.get_recent(limit=limit)
+        result = []
+
+        for row in rows:
+            project_title = row.project.title if row.project else None
+            if project_title is None and row.changes:
+                project_title = row.changes.get("title")
+            
+            result.append(ProjectChangeResponse(
+                id=row.id,
+                project_id=row.project_id,
+                action=row.action.value if hasattr(row.action, "value") else row.action,
+                changed_at=row.changed_at,
+                changes=row.changes,
+                user=row.user,
+                project_title=project_title
+            ))
+        return result
