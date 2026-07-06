@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.project import Project, ProjectStatus
 from app.repositories.project_repo import ProjectRepository
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectImportRow, ProjectImportResponse, ImportRowError
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import enum
 from app.models.project_changes import ProjectActions, ProjectChange
 from app.repositories.project_change_repo import ProjectChangeRepository
@@ -158,3 +158,15 @@ class ProjectService:
                 project_title=project_title
             ))
         return result
+
+    async def get_unread_changes_count(self, activity_last_viewed_at: datetime | None, user_id: int) -> int:
+        if activity_last_viewed_at is None:
+            return 0
+        return await self.change_repo.count_since(
+            activity_last_viewed_at,
+            exclude_user_id=user_id,
+        )
+
+    async def mark_changes_viewed(self, user) -> None:
+        user.activity_last_viewed_at = datetime.now(timezone.utc)
+        await self.repo.session.flush()

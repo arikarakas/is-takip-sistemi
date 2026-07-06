@@ -45,12 +45,12 @@ function ProjectCell({ project, columnKey }) {
                 : emptyCell(null);
         case 'aciliyet':
             return project.aciliyet
-                ? <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border whitespace-nowrap ${getAciliyetStyle(project.aciliyet)}`}>{project.aciliyet}</span>
+                ? <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[13px] font-semibold border whitespace-nowrap ${getAciliyetStyle(project.aciliyet)}`}>{project.aciliyet}</span>
                 : emptyCell(null);
         case 'hedef_tarih': {
             const formatted = formatDateTR(project.hedef_tarih);
             return formatted
-                ? <span className="tabular-nums text-slate-600 whitespace-nowrap">{formatted}</span>
+                ? <span className="font-bold tabular-nums text-slate-600 whitespace-nowrap">{formatted}</span>
                 : emptyCell(null);
         }
         case 'aksiyon':

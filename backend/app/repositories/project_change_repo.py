@@ -1,6 +1,9 @@
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
 from app.models.project_changes import ProjectActions, ProjectChange
 from app.repositories.base import BaseRepository
 
@@ -20,3 +23,12 @@ class ProjectChangeRepository(BaseRepository[ProjectChange]):
                                     selectinload(ProjectChange.user), 
                                     selectinload(ProjectChange.project)).order_by(ProjectChange.changed_at.desc()).limit(limit))
         return list(result.scalars().all())
+    
+    async def count_since(self, since: datetime, *, exclude_user_id: int | None = None) -> int:
+        query = select(func.count()).select_from(ProjectChange).where(
+            ProjectChange.changed_at > since
+        )
+        if exclude_user_id is not None:
+            query = query.where(ProjectChange.user_id != exclude_user_id)
+        result = await self.session.execute(query)
+        return result.scalar_one()

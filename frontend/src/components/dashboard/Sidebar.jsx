@@ -90,7 +90,12 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                     : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                             }`}
                         >
-                            <span className="text-lg shrink-0" aria-hidden="true">📋</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                <line x1="6" y1="11" x2="14" y2="11"></line>
+                                <line x1="6" y1="15" x2="18" y2="15"></line>
+                            </svg>
+
                             <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
                                 Proje Listesi
                             </span>
@@ -106,7 +111,13 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                     ? 'bg-slate-800 text-white'
                                     : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                             }`}>
-                            <span className="text-lg shrink-0" aria-hidden="true">🕘</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <polyline points="3 3 3 8 8 8"></polyline>
+                                <line x1="12" y1="7" x2="12" y2="12"></line>
+                                <line x1="12" y1="12" x2="16" y2="14"></line>
+                            </svg>
+
                             <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
                                 Son Değişiklikler
                             </span>
@@ -125,7 +136,13 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                         : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                                 }`}
                             >
-                                <span className="text-lg shrink-0" aria-hidden="true">👥</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+
                                 <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
                                     Kullanıcı Yönetimi
                                 </span>

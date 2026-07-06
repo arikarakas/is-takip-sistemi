@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status, Query, UploadFile, File, HTTPException
-from app.api.deps import ProjectServiceDep, CurrentUserDep
+from app.api.deps import ProjectServiceDep, CurrentUserDep, DatabaseDep
 from app.models.project import ProjectStatus
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectImportResponse
 from app.services.project_import import ImportParseError, parse_import_file
-from app.schemas.project_change import ProjectChangeResponse
+from app.schemas.project_change import ProjectChangeResponse, UnreadChangesCountResponse
 
 router = APIRouter()
 
@@ -85,6 +85,25 @@ async def import_projects_from_file(
 async def read_recent_project_changes(service: ProjectServiceDep, current_user: CurrentUserDep, limit: int = Query(30, ge=1, le=100)):
     """Son proje değişikliklerini listeler"""
     return await service.get_recent_changes(limit=limit)
+
+@router.get("/changes/unread-count", response_model=UnreadChangesCountResponse)
+async def get_unread_changes_count(service: ProjectServiceDep, current_user: CurrentUserDep):
+    """Son kontrolden bu yana oluşan değişiklik sayısını döner."""
+    count = await service.get_unread_changes_count(
+        current_user.activity_last_viewed_at,
+        current_user.id,
+    )
+    return UnreadChangesCountResponse(count=count)
+
+@router.patch("/changes/mark-viewed", status_code=status.HTTP_204_NO_CONTENT)
+async def mark_changes_viewed(
+    service: ProjectServiceDep,
+    current_user: CurrentUserDep,
+    db: DatabaseDep,
+):
+    """Son değişiklikler tablosunun görüntülendiğini işaretler."""
+    await service.mark_changes_viewed(current_user)
+    await db.commit()
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def read_project_by_id(

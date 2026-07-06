@@ -1,8 +1,12 @@
 from datetime import datetime
-from re import I
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 from app.schemas.project import UserBrief
+
+
+class UnreadChangesCountResponse(BaseModel):
+    count: int
+
 
 class ProjectChangeResponse(BaseModel):
     id: int

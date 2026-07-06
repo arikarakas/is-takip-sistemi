@@ -12,6 +12,7 @@ import { matchesTimeFilter, matchesPriorityFilter, getPriorityFilterOptions } fr
 import { API_ROOT, fetchCurrentUser, getAuthHeaders, parseApiError } from '../utils/api';
 import SplitText from "../components/dashboard/SplitText";
 import RecentChangesTable from '../components/dashboard/RecentChangesTable';
+import ShinyText from '../components/dashboard/ShinyText';
 
 const API_BASE = `${API_ROOT}/projects`;
 
@@ -217,6 +218,7 @@ function Dashboard({ onLogout }) {
     const [recentChanges, setRecentChanges] = useState([]);
     const [changesLoading, setChangesLoading] = useState(false);
     const [changesError, setChangesError] = useState(null);
+    const [unreadChangesCount, setUnreadChangesCount] = useState(0);
 
     async function loadProjects() {
         try {
@@ -228,6 +230,36 @@ function Dashboard({ onLogout }) {
             setError(err.message);
         } finally {
             setIsLoading(false);
+        }
+    }
+
+    async function markChangesViewed() {
+        try {
+            await fetch(`${API_ROOT}/projects/changes/mark-viewed`, {
+                method: 'PATCH',
+                headers: getAuthHeaders(null),
+                cache: 'no-store',
+            });
+            setUnreadChangesCount(0);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function fetchUnreadChangesCount() {
+        try {
+            const response = await fetch(`${API_ROOT}/projects/changes/unread-count`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+                cache: 'no-store',
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            setUnreadChangesCount(data.count ?? 0);
+        } catch (err) {
+            console.error(err);
         }
     }
 
@@ -249,6 +281,7 @@ function Dashboard({ onLogout }) {
     
             const data = await response.json();
             setRecentChanges(Array.isArray(data) ? data : []);
+            await markChangesViewed();
         } catch (err) {
             setChangesError(err.message);
         } finally {
@@ -306,6 +339,14 @@ function Dashboard({ onLogout }) {
         if (activeView === 'activity') {
             loadRecentChanges();
         }
+    }, [activeView]);
+
+    useEffect(() => {
+        if (activeView !== 'projects') return undefined;
+
+        fetchUnreadChangesCount();
+        const interval = setInterval(fetchUnreadChangesCount, 30_000);
+        return () => clearInterval(interval);
     }, [activeView]);
 
     async function handleDeleteProject(project) {
@@ -563,6 +604,26 @@ function Dashboard({ onLogout }) {
                             priorityOptions={priorityOptions}
                             onReset={resetAdvancedFilters}
                         />
+                        {unreadChangesCount > 0 && (
+                            <button
+                                type="button"
+                                onClick={() => setActiveView('activity')}
+                                className="ml-auto inline-flex items-center gap-2 rounded-xl bg-red-100 border border-red-200 px-4 py-2 text-sm text-red-800 hover:bg-red-200 transition cursor-pointer"
+                            >
+                                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+                                    {unreadChangesCount}
+                                </span>
+                                <ShinyText
+                                    text="yeni değişiklik — Son Değişikliklere git"
+                                    speed={1.5}
+                                    color="#9a0000"
+                                    shineColor="#ff0000"
+                                    spread={120}
+                                    direction="left"
+                                    className="text-2xs font-black tracking-tight"
+                                />
+                            </button>
+                        )}
                     </div>
                 </header>
 
