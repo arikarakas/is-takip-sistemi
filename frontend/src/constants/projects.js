@@ -14,6 +14,7 @@ export const PROJECT_TABLE_COLUMNS = [
     { key: 'risk', label: 'RİSK / BAĞIMLILIK', width: 400 },
     { key: 'guncel_sira', label: 'GÜNCEL SIRA', width: 112 },
     { key: 'tamamlanma', label: 'TAMAMLANMA', width: 186 },
+    { key: 'last_modified_by', label: 'SON DEĞİŞİKLİK', width: 176},
 ];
 
 export const PROJECT_TABLE_WIDTH = PROJECT_TABLE_COLUMNS.reduce((sum, col) => sum + col.width, 0);

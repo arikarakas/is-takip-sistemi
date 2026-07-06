@@ -3,21 +3,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.project import Project, ProjectStatus
 from app.repositories.base import BaseRepository
 from app.schemas.project import ProjectCreate, ProjectUpdate
+from sqlalchemy.orm import selectinload
 
 class ProjectRepository(BaseRepository[Project]):
     def __init__(self, session:AsyncSession):
         super().__init__(session)
     
     async def get_by_id(self, project_id: int):
-        result = await self.session.execute(select(Project).where(Project.id == project_id))
+        result = await self.session.execute(select(Project).options(selectinload(Project.last_modified_by)).where(Project.id == project_id))
         return result.scalar_one_or_none()
     
     async def get_all(self, skip: int=0, limit: int=100):
-        result = await self.session.execute(select(Project).offset(skip).limit(limit).order_by(Project.guncel_sira))
+        result = await self.session.execute(select(Project).options(selectinload(Project.last_modified_by)).offset(skip).limit(limit).order_by(Project.guncel_sira))
         return list(result.scalars().all())
     
     async def get_by_status(self, status: ProjectStatus, skip: int=0, limit: int=100):
-        result = await self.session.execute(select(Project).where(Project.durum == status).offset(skip).limit(limit).order_by(Project.guncel_sira.asc()))
+        result = await self.session.execute(select(Project).options(selectinload(Project.last_modified_by)).where(Project.durum == status).offset(skip).limit(limit).order_by(Project.guncel_sira.asc()))
         return list(result.scalars().all())
     
     async def create(self, data: ProjectCreate):

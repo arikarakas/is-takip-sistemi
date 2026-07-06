@@ -408,7 +408,7 @@ function Dashboard({ onLogout }) {
                             </button>
                             <h1 className="text-2xl font-black text-slate-800 tracking-tight">
                                 <SplitText
-                                    text="Tüm Projeler ve İşler"
+                                    text="Proje ve İşlerin Takibi"
                                     delay={50}
                                     duration={1.25}
                                     ease="power3.out"

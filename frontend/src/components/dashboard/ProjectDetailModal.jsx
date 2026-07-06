@@ -58,6 +58,7 @@ function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeletin
                         <DetailField label="HEDEF TARİH" value={formatDateTR(project.hedef_tarih)} />
                         <DetailField label="ÖNCELİK" value={project.oncelik != null ? `P${project.oncelik}` : null} />
                         <DetailField label="GÜNCEL SIRA" value={project.guncel_sira} />
+                        <DetailField label="SON DEĞİŞİKLİĞİ YAPAN" value={project.last_modified_by?.full_name || project.last_modified_by?.username}/>
                     </div>
 
                     <div>

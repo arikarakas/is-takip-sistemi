@@ -1,6 +1,7 @@
 import enum
 from fastapi.exceptions import FastAPIError
-from sqlalchemy import CheckConstraint, Column, Integer, String, Text, Date, Enum
+from sqlalchemy import CheckConstraint, Column, Integer, String, Text, Date, Enum, ForeignKey
+from sqlalchemy.orm import relationship
 from app.models.base import TimestampMixin
 from app.core.database import Base
 
@@ -30,6 +31,8 @@ class Project(Base, TimestampMixin):
     risk = Column(Text, nullable=True)
     guncel_sira = Column(Integer, unique=False, nullable=False)
     tamamlanma = Column(Integer, nullable=False, default=0)
+    last_modified_by_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    last_modified_by = relationship("User", foreign_keys=[last_modified_by_id])
 
     __table_args__ = (
         CheckConstraint('tamamlanma >= 0 AND tamamlanma <= 100', name='check_tamamlanma_range'),

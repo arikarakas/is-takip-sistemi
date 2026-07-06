@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from sqlalchemy import null
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.project import Project, ProjectStatus
 from app.repositories.project_repo import ProjectRepository
@@ -16,7 +17,7 @@ class ProjectService:
     def __init__(self, db: AsyncSession) -> None:
         self.repo = ProjectRepository(db)
     
-    async def create_project(self, data: ProjectCreate):
+    async def create_project(self, data: ProjectCreate, user_id: int):
 
         next_sira = (await self.repo.get_max_sira()) + 1
         next_guncel = (await self.repo.get_max_guncel_sira()) + 1
@@ -25,6 +26,7 @@ class ProjectService:
         project_data["sira"] = next_sira
         project_data["guncel_sira"] = next_guncel
         project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)
+        project_data["last_modified_by_id"] = user_id
         
         db_project = Project(**project_data)
         self.repo.session.add(db_project)
@@ -50,7 +52,7 @@ class ProjectService:
         """Belirli bir durumdaki projeleri filtreler."""
         return await self.repo.get_by_status(status=project_status, skip=skip, limit=limit)
     
-    async def update_project(self, project_id, data: ProjectUpdate):
+    async def update_project(self, project_id, data: ProjectUpdate, user_id: int):
         project = await self.get_project_by_id(project_id)
         update_data = data.model_dump(exclude_unset=True)
 
@@ -60,6 +62,7 @@ class ProjectService:
                 new_durum,
                 update_data.get("tamamlanma", project.tamamlanma),
             )
+        project.last_modified_by_id = user_id
         return await self.repo.update(project, ProjectUpdate(**update_data))
     
     async def delete_project(self, project_id: int) -> None:
@@ -83,6 +86,7 @@ class ProjectService:
             project_data["sira"] = data.sira if data.sira is not None else next_sira
             project_data["guncel_sira"] = data.guncel_sira if data.guncel_sira is not None else next_guncel
             project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)
+            project_data["last_modified_by_id"] = None
 
             self.repo.session.add(Project(**project_data))
             imported += 1

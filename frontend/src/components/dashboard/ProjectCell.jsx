@@ -65,6 +65,11 @@ function ProjectCell({ project, columnKey }) {
             return <ProgressBar value={project.tamamlanma} />;
         case 'guncel_sira':
             return emptyCell(project.guncel_sira);
+        case 'last_modified_by':{
+            const user = project.last_modified_by;
+            const label = user?.full_name || user?.username;
+            return label ? <span className='whitespace-nowrap'>{label}</span> : emptyCell(null);
+        }
         default:
             return emptyCell(project[columnKey]);
     }

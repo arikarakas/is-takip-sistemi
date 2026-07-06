@@ -3,6 +3,12 @@ from typing import Optional
 from pydantic import BaseModel, Field, FieldValidationInfo, field_validator
 from app.models.project import ProjectStatus
 
+class UserBrief(BaseModel):
+    id: int
+    username: str
+    full_name: Optional[str] = None
+    model_config = {"from_attributes": True}
+
 # ORTAK TEMEL ŞEMA
 class ProjectBase(BaseModel):
     oncelik: Optional[int] = Field(None, description="Öncelik için sayısal değer")
@@ -62,6 +68,7 @@ class ProjectResponse(ProjectBase):
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
+    last_modified_by: Optional[UserBrief] = None
 
 
 class ProjectImportRow(ProjectBase):
