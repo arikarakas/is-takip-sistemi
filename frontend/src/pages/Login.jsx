@@ -1,13 +1,20 @@
-import React, { useActionState } from 'react'
+import React, { useActionState, useEffect, useState } from 'react'
 import logo from '../assets/logo.png';
 import { API_ROOT } from '../utils/api';
 
 async function loginAction(prevState, formData) {
   const username = formData.get("username");
-  const password = formData.get("password")
+  const password = formData.get("password");
+
+  const fail = (error) => ({
+    success: false,
+    error,
+    username: username ?? '',
+    passwordResetKey: (prevState.passwordResetKey ?? 0) + 1,
+  });
 
   if (!username || !password){
-    return {error: "Lütfen kullanıcı adı veya şifre giriniz."};
+    return fail("Lütfen kullanıcı adı veya şifre giriniz.");
   }
 
   try{
@@ -24,19 +31,31 @@ async function loginAction(prevState, formData) {
     const data = await response.json();
 
     if(!response.ok){
-        return {error: data.detail || "Giriş başarısız. Bilgilerinizi kontrol edin."}
+        return fail(data.detail || "Giriş başarısız. Bilgilerinizi kontrol edin.");
     }
     localStorage.setItem("token", data.access_token);
 
     return { success: true, error: null };
   }catch(err){
     console.error("Bağlantı hatası:", err);
-    return { error: "Sunucuya bağlanılamadı." };
+    return fail("Sunucuya bağlanılamadı.");
   }
 }
 
 function Login({ onLoginSuccess }) {
-  const [state, formAction, isPending] = useActionState(loginAction, {success: false, error: null});
+  const [state, formAction, isPending] = useActionState(loginAction, {
+    success: false,
+    error: null,
+    passwordResetKey: 0,
+  });
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    if (state?.error && state.username !== undefined) {
+      setUsername(state.username);
+    }
+  }, [state?.error, state?.username, state?.passwordResetKey]);
+
   if (state?.success) {
     onLoginSuccess();
   }
@@ -78,6 +97,8 @@ function Login({ onLoginSuccess }) {
             <input
               name="username"
               type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="Kullanıcı adı"
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white"
             />
@@ -88,6 +109,7 @@ function Login({ onLoginSuccess }) {
               Şifre
             </label>
             <input
+              key={state.passwordResetKey ?? 0}
               name="password"
               type="password"
               placeholder="••••••••"
