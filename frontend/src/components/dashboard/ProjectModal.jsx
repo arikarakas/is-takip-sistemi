@@ -67,6 +67,16 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                             </div>
 
                             <div>
+                                <label className={LABEL_CLASS_NAME}>İLGİLİ KİŞİ E-MAIL</label>
+                                <input name="ilgili_email" type="text" defaultValue={project?.ilgili_email || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
+                            </div>
+
+                            <div>
+                                <label className={LABEL_CLASS_NAME}>İLGİLİ KİŞİ TELEFON</label>
+                                <input name="ilgili_telefon" type="text" defaultValue={project?.ilgili_telefon || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
+                            </div>
+
+                            <div>
                                 <label className={LABEL_CLASS_NAME}>ÖNCELİK</label>
                                 <input name="oncelik" type="number" min="1" placeholder="Örn: 1" defaultValue={project?.oncelik || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>

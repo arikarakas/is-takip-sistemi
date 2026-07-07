@@ -56,6 +56,23 @@ function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeletin
                         <DetailField label="SORUMLU KİŞİ(LER)" value={project.sorumlular} />
                         <DetailField label="İLGİLİ KİŞİ" value={project.ilgili} />
                         <DetailField label="HEDEF TARİH" value={formatDateTR(project.hedef_tarih)} />
+                        <DetailField 
+                            label="İLGİLİ KİŞİ BİLGİ" 
+                            value={
+                                <>
+                                    {project.ilgili_email && (
+                                        <div>{project.ilgili_email}</div>
+                                    )}
+                                    {project.ilgili_telefon && (
+                                        <div>{project.ilgili_telefon}</div>
+                                    )}
+                                    {/* Eğer iki bilgi de yoksa, çizgi göster */}
+                                    {!project.ilgili_email && !project.ilgili_telefon && (
+                                        <span className="text-slate-300">—</span>
+                                    )}
+                                </>
+                            }
+                        />
                         <DetailField label="ÖNCELİK" value={project.oncelik != null ? `P${project.oncelik}` : null} />
                         <DetailField label="GÜNCEL SIRA" value={project.guncel_sira} />
                         <DetailField label="SON DEĞİŞİKLİĞİ YAPAN" value={project.last_modified_by?.full_name || project.last_modified_by?.username}/>

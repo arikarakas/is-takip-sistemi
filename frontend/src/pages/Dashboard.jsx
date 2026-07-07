@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useActionState, useMemo } from 'react';
+import React, { useState, useEffect, useActionState, useMemo, useRef } from 'react';
 import Sidebar, { MenuIcon } from '../components/dashboard/Sidebar';
 import ProjectTable from '../components/dashboard/ProjectTable';
 import ProjectCards from '../components/dashboard/ProjectCards';
@@ -13,6 +13,8 @@ import { API_ROOT, fetchCurrentUser, getAuthHeaders, parseApiError } from '../ut
 import SplitText from "../components/dashboard/SplitText";
 import RecentChangesTable from '../components/dashboard/RecentChangesTable';
 import ShinyText from '../components/dashboard/ShinyText';
+import { useNotification } from '../components/dashboard/useNotification';
+import { hover } from 'motion/react';
 
 const API_BASE = `${API_ROOT}/projects`;
 
@@ -103,7 +105,7 @@ async function createProjectAction(prevState, formData) {
     const oncelik = trimValue(formData.get('oncelik'));
     if (oncelik) payload.oncelik = Number(oncelik);
 
-    for (const field of ['aciliyet', 'ilgili', 'beklenen', 'notlar', 'risk']) {
+    for (const field of ['aciliyet', 'ilgili', 'beklenen', 'notlar', 'risk', 'ilgili_email', 'ilgili_telefon']) {
         const value = trimValue(formData.get(field));
         if (value) payload[field] = value;
     }
@@ -170,7 +172,7 @@ async function updateProjectAction(prevState, formData) {
     const oncelik = trimValue(formData.get('oncelik'));
     if (oncelik) payload.oncelik = Number(oncelik);
 
-    for (const field of ['aciliyet', 'ilgili', 'beklenen', 'notlar', 'risk']) {
+    for (const field of ['aciliyet', 'ilgili', 'beklenen', 'notlar', 'risk', 'ilgili_email', 'ilgili_telefon']) {
         const value = trimValue(formData.get(field));
         if (value) payload[field] = value;
     }
@@ -219,6 +221,8 @@ function Dashboard({ onLogout }) {
     const [changesLoading, setChangesLoading] = useState(false);
     const [changesError, setChangesError] = useState(null);
     const [unreadChangesCount, setUnreadChangesCount] = useState(0);
+    const previousUnreadCountRef = useRef(null);
+    const isUnreadNotificationReadyRef = useRef(false);
 
     async function loadProjects() {
         try {
@@ -348,6 +352,33 @@ function Dashboard({ onLogout }) {
         const interval = setInterval(fetchUnreadChangesCount, 30_000);
         return () => clearInterval(interval);
     }, [activeView]);
+
+    const { triggerNotification } = useNotification();
+
+    useEffect(() => {
+        const previousCount = previousUnreadCountRef.current;
+
+        if (!isUnreadNotificationReadyRef.current || previousCount === null) {
+            previousUnreadCountRef.current = unreadChangesCount;
+            isUnreadNotificationReadyRef.current = true;
+            return;
+        }
+
+        if (unreadChangesCount > previousCount) {
+            const newItems = unreadChangesCount - previousCount;
+            const message = newItems === 1
+                ? '1 yeni değişiklik eklendi.'
+                : `${newItems} yeni değişiklik eklendi.`;
+
+            triggerNotification('Proje Takip', {
+                body: message,
+                tag: 'project-changes',
+                onClickAction: () => setActiveView('activity'),
+            });
+        }
+
+        previousUnreadCountRef.current = unreadChangesCount;
+    }, [unreadChangesCount, triggerNotification]);
 
     async function handleDeleteProject(project) {
         const confirmed = window.confirm(`"${project.title}" projesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`);
@@ -558,7 +589,17 @@ function Dashboard({ onLogout }) {
                                 }}
                                 className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition cursor-pointer"
                             >
-                                İçe Aktar
+                                <span className="flex items-center gap-2">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M21 3H3M18 13L12 7M12 7L6 13M12 7V21"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"/>
+                                    </svg>
+                                    İçe Aktar
+                                </span>
                             </button>
 
                             <button

@@ -74,6 +74,7 @@ DURUM_MAP: dict[str, ProjectStatus] = {
     "beklemede": ProjectStatus.BEKLEMEDE,
     "açık": ProjectStatus.AÇIK,
     "acik": ProjectStatus.AÇIK,
+    "teklif": ProjectStatus.AÇIK,
     "devam ediyor": ProjectStatus.DEVAM_EDİYOR,
     "devam edıyor": ProjectStatus.DEVAM_EDİYOR,
     "tamamlandı": ProjectStatus.TAMAMLANDI,

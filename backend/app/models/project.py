@@ -1,5 +1,4 @@
 import enum
-from fastapi.exceptions import FastAPIError
 from sqlalchemy import CheckConstraint, Column, Integer, String, Text, Date, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import TimestampMixin
@@ -8,7 +7,7 @@ from app.core.database import Base
 class ProjectStatus(str, enum.Enum):
     BEKLEMEDE = "BEKLEMEDE"
     AÇIK = "AÇIK"
-    DEVAM_EDİYOR = "DEVAM EDİYOR"
+    DEVAM_EDİYOR = "DEVAM_EDİYOR"
     TAMAMLANDI = "TAMAMLANDI"
 
 
@@ -24,6 +23,8 @@ class Project(Base, TimestampMixin):
     aksiyon = Column(Text, nullable=False)
     sorumlular = Column(Text, nullable=False)
     ilgili = Column(String(150), nullable=True)
+    ilgili_email = Column(String(100))
+    ilgili_telefon = Column(String(100), nullable=True)
     hedef_tarih = Column(Date, nullable=True)
     durum = Column(Enum(ProjectStatus), default=ProjectStatus.BEKLEMEDE, nullable=False, index=True)
     beklenen = Column(Text, nullable=True)

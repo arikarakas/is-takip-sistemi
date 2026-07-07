@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel, Field, FieldValidationInfo, field_validator
+from pydantic import BaseModel, Field, field_validator
 from app.models.project import ProjectStatus
 
 class UserBrief(BaseModel):
@@ -18,6 +18,8 @@ class ProjectBase(BaseModel):
     aksiyon: str = Field(..., min_length=1, description="Aksiyon / Sonraki Adım")
     sorumlular: str = Field(..., min_length=1, description="İşten sorumlu kişiler")
     ilgili: Optional[str] = Field(None, max_length=150, description="İlgili diğer kişiler")
+    ilgili_email: Optional[str] = Field(None, max_length=100, description="İlgili kişi e-posta")
+    ilgili_telefon: Optional[str] = Field(None, max_length=100, description="İlgili kişi telefon")
     hedef_tarih: Optional[date] = Field(None, description="Hedef bitiş tarihi (YYYY-MM-DD)")
     durum: ProjectStatus = Field(ProjectStatus.BEKLEMEDE, description="İşin güncel durumu")
     beklenen: Optional[str] = Field(None, description="Beklenen aksiyon/durum")
@@ -47,6 +49,8 @@ class ProjectUpdate(BaseModel):
     aksiyon: Optional[str] = None
     sorumlular: Optional[str] = None
     ilgili: Optional[str] = None
+    ilgili_email: Optional[str] = None
+    ilgili_telefon: Optional[str] = None
     hedef_tarih: Optional[date] = None
     durum: Optional[ProjectStatus] = None
     beklenen: Optional[str] = None
@@ -69,6 +73,8 @@ class ProjectResponse(ProjectBase):
     updated_at: datetime
     model_config = {"from_attributes": True}
     last_modified_by: Optional[UserBrief] = None
+    ilgili_email: Optional[str] = None
+    ilgili_telefon: Optional[str] = None
 
 
 class ProjectImportRow(ProjectBase):
