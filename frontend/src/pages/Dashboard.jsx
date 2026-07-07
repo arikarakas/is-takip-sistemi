@@ -191,6 +191,7 @@ async function updateProjectAction(prevState, formData) {
 function Dashboard({ onLogout }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [activeView, setActiveView] = useState('projects');
+    const isAdmin = currentUser?.role === 'admin';
     const [projects, setProjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -303,10 +304,10 @@ function Dashboard({ onLogout }) {
     }, [onLogout]);
 
     useEffect(() => {
-        if (activeView === 'users' && currentUser && currentUser.role !== 'admin') {
+        if (activeView === 'users' && currentUser && !isAdmin) {
             setActiveView('projects');
         }
-    }, [activeView, currentUser]);
+    }, [activeView, currentUser, isAdmin]);
 
     useEffect(() => {
         if (activeView === 'projects') {
@@ -487,7 +488,7 @@ function Dashboard({ onLogout }) {
                 currentUser={currentUser}
                 activeView={activeView}
                 onNavigate={setActiveView}
-                isAdmin={currentUser?.role === 'admin'}
+                isAdmin={isAdmin}
             />
 
             <div
@@ -739,6 +740,7 @@ function Dashboard({ onLogout }) {
                 onDelete={handleDeleteProject}
                 isDeleting={isDeleting}
                 deleteError={deleteError}
+                isAdmin={isAdmin}
             />
                 </>
             )}
