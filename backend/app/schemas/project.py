@@ -71,6 +71,7 @@ class ProjectResponse(ProjectBase):
     guncel_sira: int
     created_at: datetime
     updated_at: datetime
+    sorumlular: str = Field(default="", description="İşten sorumlu kişiler")
     model_config = {"from_attributes": True}
     last_modified_by: Optional[UserBrief] = None
     ilgili_email: Optional[str] = None
