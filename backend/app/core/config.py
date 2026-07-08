@@ -68,6 +68,39 @@ class Settings(BaseSettings):
         description="IP bazlı giriş denemesi penceresi (saniye).",
     )
 
+    IMPORT_MAX_FILE_SIZE_MB: int = Field(
+        20,
+        ge=1,
+        le=100,
+        description="İçe aktarma için maksimum dosya boyutu (MB).",
+    )
+
+    API_RATE_LIMIT_IMPORT_MAX: int = Field(
+        5,
+        ge=1,
+        description="Import endpoint'i için IP başına izin verilen istek sayısı.",
+    )
+    API_RATE_LIMIT_IMPORT_WINDOW_SECONDS: int = Field(
+        60,
+        ge=10,
+        description="Import rate limit penceresi (saniye).",
+    )
+    API_RATE_LIMIT_USERS_MAX: int = Field(
+        60,
+        ge=1,
+        description="Kullanıcı CRUD endpoint'leri için IP başına izin verilen istek sayısı.",
+    )
+    API_RATE_LIMIT_USERS_WINDOW_SECONDS: int = Field(
+        60,
+        ge=10,
+        description="Kullanıcı CRUD rate limit penceresi (saniye).",
+    )
+
+    @computed_field
+    @property
+    def IMPORT_MAX_FILE_SIZE_BYTES(self) -> int:
+        return self.IMPORT_MAX_FILE_SIZE_MB * 1024 * 1024
+
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",

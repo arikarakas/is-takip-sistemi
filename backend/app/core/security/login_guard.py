@@ -4,6 +4,7 @@ import time
 from fastapi import HTTPException, Request, status
 
 from app.core.config import settings
+from app.core.http import get_client_ip
 
 
 class LoginGuard:
@@ -12,15 +13,6 @@ class LoginGuard:
     _lock = threading.Lock()
     _ip_attempts: dict[str, list[float]] = {}
     _account_state: dict[str, tuple[int, float, float]] = {}  # count, window_start, locked_until
-
-    @staticmethod
-    def _client_ip(request: Request) -> str:
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
-        if request.client:
-            return request.client.host
-        return "unknown"
 
     @classmethod
     def _prune_ip_attempts(cls, ip: str, now: float) -> list[float]:
@@ -43,7 +35,7 @@ class LoginGuard:
     @classmethod
     def check_ip_limit(cls, request: Request) -> None:
         now = time.monotonic()
-        ip = cls._client_ip(request)
+        ip = get_client_ip(request)
 
         with cls._lock:
             attempts = cls._prune_ip_attempts(ip, now)

@@ -5,8 +5,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security.jwt import decode_token
+from app.core.security.rate_limit import make_rate_limiter
 from app.models import User
 from app.services.project_service import ProjectService
 
@@ -77,7 +79,20 @@ async def require_admin(current_user: CurrentUserDep) -> User:
 
 AdminUserDep = Annotated[User, Depends(require_admin)]
 
+ImportRateLimitDep = Annotated[
+    None,
+    Depends(
+        make_rate_limiter(
+            "import",
+            settings.API_RATE_LIMIT_IMPORT_MAX,
+            settings.API_RATE_LIMIT_IMPORT_WINDOW_SECONDS,
+        )
+    ),
+]
+
 
 async def get_project_service(db: DatabaseDep) -> ProjectService:
     return ProjectService(db)
+
+
 ProjectServiceDep = Annotated[ProjectService, Depends(get_project_service)]

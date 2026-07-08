@@ -1,12 +1,24 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 
 from app.api.deps import AdminUserDep, DatabaseDep
+from app.core.config import settings
 from app.core.security import get_password_hash
+from app.core.security.rate_limit import make_rate_limiter
 from app.models import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[
+        Depends(
+            make_rate_limiter(
+                "users",
+                settings.API_RATE_LIMIT_USERS_MAX,
+                settings.API_RATE_LIMIT_USERS_WINDOW_SECONDS,
+            )
+        )
+    ]
+)
 
 
 @router.get("/", response_model=list[UserResponse])

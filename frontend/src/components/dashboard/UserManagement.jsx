@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useActionState } from 'react';
-import { API_ROOT, getAuthHeaders, parseApiError } from '../../utils/api';
+import { API_ROOT, apiFetch, getAuthHeaders, parseApiError } from '../../utils/api';
 import SplitText from './SplitText';
 
 const USERS_API = `${API_ROOT}/users`;
 
 async function fetchUsers() {
-    const response = await fetch(`${USERS_API}/`, {
+    const response = await apiFetch(`${USERS_API}/`, {
         method: 'GET',
         headers: getAuthHeaders(),
         cache: 'no-store',
@@ -38,7 +38,7 @@ async function createUserAction(_prevState, formData) {
     if (fullName) payload.full_name = fullName;
 
     try {
-        const response = await fetch(`${USERS_API}/`, {
+        const response = await apiFetch(`${USERS_API}/`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(payload),
@@ -59,7 +59,7 @@ async function createUserAction(_prevState, formData) {
 }
 
 async function updateUser(userId, updates) {
-    const response = await fetch(`${USERS_API}/${userId}`, {
+    const response = await apiFetch(`${USERS_API}/${userId}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),

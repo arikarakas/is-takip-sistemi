@@ -60,20 +60,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
-    op.execute(
-        """
-        INSERT INTO users (username, email, hashed_password, full_name, role, is_active)
-        VALUES (
-            'admin', 
-            'admin@admin.com', 
-            '$2b$12$jOHthO9bpX38Ym7XL6HnDOy7eWOqSUDynQdFBWY3yL43U5kdw9VLa', 
-            'Sistem Yöneticisi', 
-            'admin', 
-            true
-        )
-        ON CONFLICT (username) DO NOTHING;
-        """
-    )
     # ### end Alembic commands ###
 
 def downgrade() -> None:

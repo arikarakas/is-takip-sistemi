@@ -1,5 +1,12 @@
 from fastapi import APIRouter, status, Query, UploadFile, File, HTTPException
-from app.api.deps import ProjectServiceDep, CurrentUserDep, DatabaseDep
+from app.api.deps import (
+    ProjectServiceDep,
+    CurrentUserDep,
+    AdminUserDep,
+    DatabaseDep,
+    ImportRateLimitDep,
+)
+from app.core.security.file_validation import read_import_file
 from app.models.project import ProjectStatus
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectImportResponse
 from app.services.project_import import ImportParseError, parse_import_file
@@ -40,7 +47,8 @@ async def read_projects_by_status(
 @router.post("/import", response_model=ProjectImportResponse, status_code=status.HTTP_200_OK)
 async def import_projects_from_file(
     service: ProjectServiceDep,
-    current_user_id: CurrentUserDep,
+    _: AdminUserDep,
+    __: ImportRateLimitDep,
     file: UploadFile = File(...),
     header_row: int | None = Query(
         None,
@@ -49,25 +57,13 @@ async def import_projects_from_file(
         description="Başlık satırı (1 tabanlı). Boş bırakılırsa dosyada otomatik aranır.",
     ),
 ):
-    """Excel veya CSV dosyasından projeleri içe aktarır."""
-    if not file.filename:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dosya adı bulunamadı.")
-
-    lower_name = file.filename.lower()
-    if not lower_name.endswith((".xlsx", ".xls", ".csv")):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Desteklenen formatlar: .xlsx, .xls, .csv",
-        )
-
-    file_bytes = await file.read()
-    if not file_bytes:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dosya boş.")
+    """Excel veya CSV dosyasından projeleri içe aktarır. Yalnızca admin erişebilir."""
+    file_bytes, filename = await read_import_file(file)
 
     try:
         rows, detected_header_row, errors = parse_import_file(
             file_bytes,
-            file.filename,
+            filename,
             header_row=header_row,
         )
     except ImportParseError as exc:

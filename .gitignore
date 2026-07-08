@@ -43,3 +43,6 @@ frontend/.next/
 frontend/vite
 
 backups
+
+*.dump
+*.sql

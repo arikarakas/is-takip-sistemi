@@ -9,7 +9,7 @@ import FilterPanel from '../components/dashboard/FilterPanel';
 import UserManagement from '../components/dashboard/UserManagement';
 import { ACILIYET_DEGERI } from '../constants/projects';
 import { matchesTimeFilter, matchesPriorityFilter, getPriorityFilterOptions } from '../utils/projectFilters';
-import { API_ROOT, fetchCurrentUser, getAuthHeaders, parseApiError } from '../utils/api';
+import { API_ROOT, apiFetch, getAuthHeaders, parseApiError } from '../utils/api';
 import SplitText from "../components/dashboard/SplitText";
 import RecentChangesTable from '../components/dashboard/RecentChangesTable';
 import ShinyText from '../components/dashboard/ShinyText';
@@ -23,7 +23,7 @@ function trimValue(value) {
 }
 
 async function fetchProjects({ skip = 0, limit = 500 } = {}) {
-    const response = await fetch(`${API_BASE}/?skip=${skip}&limit=${limit}`, {
+    const response = await apiFetch(`${API_BASE}/?skip=${skip}&limit=${limit}`, {
         method: 'GET',
         headers: getAuthHeaders(),
         cache: 'no-store',
@@ -41,7 +41,7 @@ async function fetchProjects({ skip = 0, limit = 500 } = {}) {
 }
 
 async function createProject(payload) {
-    const response = await fetch(`${API_BASE}/`, {
+    const response = await apiFetch(`${API_BASE}/`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
@@ -68,7 +68,7 @@ async function importProjects(formData) {
     }
 
     const token = localStorage.getItem('token');
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body,
@@ -122,7 +122,7 @@ async function createProjectAction(prevState, formData) {
 }
 
 async function deleteProject(projectId) {
-    const response = await fetch(`${API_BASE}/${projectId}`, {
+    const response = await apiFetch(`${API_BASE}/${projectId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
     });
@@ -134,7 +134,7 @@ async function deleteProject(projectId) {
 }
 
 async function updateProject(projectId, payload) {
-    const response = await fetch(`${API_BASE}/${projectId}`, {
+    const response = await apiFetch(`${API_BASE}/${projectId}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
@@ -188,8 +188,7 @@ async function updateProjectAction(prevState, formData) {
     }
 }
 
-function Dashboard({ onLogout }) {
-    const [currentUser, setCurrentUser] = useState(null);
+function Dashboard({ currentUser, onLogout }) {
     const [activeView, setActiveView] = useState('projects');
     const isAdmin = currentUser?.role === 'admin';
     const [projects, setProjects] = useState([]);
@@ -240,7 +239,7 @@ function Dashboard({ onLogout }) {
 
     async function markChangesViewed() {
         try {
-            await fetch(`${API_ROOT}/projects/changes/mark-viewed`, {
+            await apiFetch(`${API_ROOT}/projects/changes/mark-viewed`, {
                 method: 'PATCH',
                 headers: getAuthHeaders(null),
                 cache: 'no-store',
@@ -253,7 +252,7 @@ function Dashboard({ onLogout }) {
 
     async function fetchUnreadChangesCount() {
         try {
-            const response = await fetch(`${API_ROOT}/projects/changes/unread-count`, {
+            const response = await apiFetch(`${API_ROOT}/projects/changes/unread-count`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
                 cache: 'no-store',
@@ -273,7 +272,7 @@ function Dashboard({ onLogout }) {
         setChangesError(null);
     
         try {
-            const response = await fetch(`${API_ROOT}/projects/changes/recent?limit=30`, {
+            const response = await apiFetch(`${API_ROOT}/projects/changes/recent?limit=30`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
                 cache: 'no-store',
@@ -293,15 +292,6 @@ function Dashboard({ onLogout }) {
             setChangesLoading(false);
         }
     }
-
-    useEffect(() => {
-        fetchCurrentUser()
-            .then(setCurrentUser)
-            .catch((err) => {
-                console.error(err);
-                onLogout();
-            });
-    }, [onLogout]);
 
     useEffect(() => {
         if (activeView === 'users' && currentUser && !isAdmin) {
