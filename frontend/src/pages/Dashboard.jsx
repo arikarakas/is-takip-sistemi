@@ -14,7 +14,6 @@ import SplitText from "../components/dashboard/SplitText";
 import RecentChangesTable from '../components/dashboard/RecentChangesTable';
 import ShinyText from '../components/dashboard/ShinyText';
 import { useNotification } from '../components/dashboard/useNotification';
-import { hover } from 'motion/react';
 
 const API_BASE = `${API_ROOT}/projects`;
 
@@ -33,6 +32,24 @@ async function fetchProjects({ skip = 0, limit = 500 } = {}) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
             `${parseApiError(errorData.detail, 'Yetkisiz veya Geçersiz İstek')}`,
+        );
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : (data.items || []);
+}
+
+async function fetchAssignedProjects({ skip = 0, limit = 500 } = {}) {
+    const response = await apiFetch(`${API_BASE}/assigned/me?skip=${skip}&limit=${limit}`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        cache: 'no-store',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+            `${parseApiError(errorData.detail, 'Atanan projeler yüklenemedi.')}`,
         );
     }
 
@@ -213,8 +230,11 @@ function Dashboard({ currentUser, onLogout }) {
     const [activeView, setActiveView] = useState('projects');
     const isAdmin = currentUser?.role === 'admin';
     const [projects, setProjects] = useState([]);
+    const [assignedProjects, setAssignedProjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAssignedLoading, setIsAssignedLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [assignedError, setAssignedError] = useState(null);
     const [viewMode, setViewMode] = useState('table');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formState, formAction, isPending] = useActionState(createProjectAction, { success: false, error: null });
@@ -255,6 +275,20 @@ function Dashboard({ currentUser, onLogout }) {
             setError(err.message);
         } finally {
             setIsLoading(false);
+        }
+    }
+
+    async function loadAssignedProjects() {
+        setIsAssignedLoading(true);
+        try {
+            const data = await fetchAssignedProjects();
+            setAssignedProjects(data);
+            setAssignedError(null);
+        } catch (err) {
+            console.error(err);
+            setAssignedError(err.message);
+        } finally {
+            setIsAssignedLoading(false);
         }
     }
 
@@ -323,6 +357,8 @@ function Dashboard({ currentUser, onLogout }) {
     useEffect(() => {
         if (activeView === 'projects') {
             loadProjects();
+        } else if (activeView === 'assigned') {
+            loadAssignedProjects();
         }
     }, [activeView]);
 
@@ -342,6 +378,7 @@ function Dashboard({ currentUser, onLogout }) {
 
         if (wasPending && !isEditPending && editState?.success && editingProject) {
             loadProjects();
+            loadAssignedProjects();
             setEditingProject(null);
         }
     }, [editState?.success, editingProject, isEditPending]);
@@ -407,7 +444,9 @@ function Dashboard({ currentUser, onLogout }) {
             await deleteProject(project.id);
             setSelectedProject(null);
             setProjects((prev) => prev.filter((p) => p.id !== project.id));
+            setAssignedProjects((prev) => prev.filter((p) => p.id !== project.id));
             await loadProjects();
+            await loadAssignedProjects();
         } catch (err) {
             setDeleteError(err.message);
         } finally {
@@ -460,7 +499,8 @@ function Dashboard({ currentUser, onLogout }) {
         setPriorityFilter('TÜMÜ');
     }
 
-    const sortedProjects = [...filteredProjects].sort((a, b) => {
+    function sortProjects(list) {
+        return [...list].sort((a, b) => {
         if (!sortKey) return 0;
 
         let valA = a[sortKey];
@@ -493,6 +533,19 @@ function Dashboard({ currentUser, onLogout }) {
         const siraB = b.sira ?? Infinity;
         return siraA - siraB;
     });
+    }
+
+    const sortedProjects = sortProjects(filteredProjects);
+    const sortedAssignedProjects = sortProjects(assignedProjects);
+
+    const handleSort = (key) => {
+        if (sortKey === key) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
@@ -541,6 +594,56 @@ function Dashboard({ currentUser, onLogout }) {
                             isLoading={changesLoading}
                             error={changesError}
                         />
+                    </>
+                ) : activeView === 'assigned' ? (
+                    <>
+                        <header className="mb-8">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                                    aria-label="Menüyü aç"
+                                >
+                                    <MenuIcon className="w-6 h-6" />
+                                </button>
+                                <div>
+                                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                                        <SplitText
+                                            text="Bana Atananlar"
+                                            delay={50}
+                                            duration={1.25}
+                                            ease="power3.out"
+                                            splitType="chars"
+                                            from={{ opacity: 0, y: 40 }}
+                                            to={{ opacity: 1, y: 0 }}
+                                            threshold={0.1}
+                                            rootMargin="-100px"
+                                            textAlign="center"
+                                            showCallback
+                                        />
+                                    </h1>
+                                    <p className="text-slate-500 mt-1">Size atanmış işler</p>
+                                </div>
+                            </div>
+                        </header>
+
+                        {isAssignedLoading && <div className="text-center p-12 text-slate-500">Veriler güncelleniyor...</div>}
+                        {assignedError && <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100">Hata: {assignedError}</div>}
+
+                        {!isAssignedLoading && !assignedError && (
+                            assignedProjects.length === 0 ? (
+                                <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 text-slate-400">Size atanmış proje bulunamadı.</div>
+                            ) : (
+                                <ProjectTable
+                                    projects={sortedAssignedProjects}
+                                    onRowClick={setSelectedProject}
+                                    sortKey={sortKey}
+                                    sortDirection={sortDirection}
+                                    onSort={handleSort}
+                                />
+                            )
+                        )}
                     </>
                 ) : (
                     <>
@@ -697,14 +800,7 @@ function Dashboard({ currentUser, onLogout }) {
                                 onRowClick={setSelectedProject} 
                                 sortKey={sortKey} 
                                 sortDirection={sortDirection}
-                                onSort={(key) => {
-                                    if (sortKey === key) {
-                                        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-                                    } else {
-                                        setSortKey(key);
-                                        setSortDirection('asc');
-                                    }
-                                }}
+                                onSort={handleSort}
                                 />
                             : <ProjectCards projects={sortedProjects} onCardClick={setSelectedProject}/>
                     )
@@ -713,32 +809,8 @@ function Dashboard({ currentUser, onLogout }) {
                 )}
             </main>
 
-            {activeView === 'projects' && (
+            {(activeView === 'projects' || activeView === 'assigned') && (
                 <>
-            <ProjectModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                formAction={formAction}
-                formState={formState}
-                isPending={isPending}
-            />
-            <ProjectModal
-                key={editingProject ? `edit-${editingProject.id}` : 'edit-none'}
-                isOpen={!!editingProject}
-                onClose={() => setEditingProject(null)}
-                formAction={editAction}
-                formState={editState}
-                isPending={isEditPending}
-                project={editingProject}
-            />
-            <ImportModal
-                isOpen={isImportOpen}
-                onClose={() => setIsImportOpen(false)}
-                onImport={handleImport}
-                isImporting={isImporting}
-                result={importResult}
-                error={importError}
-            />
             <ProjectDetailModal 
                 project={selectedProject}
                 onClose={() => {
@@ -754,6 +826,34 @@ function Dashboard({ currentUser, onLogout }) {
                 isDeleting={isDeleting}
                 deleteError={deleteError}
                 isAdmin={isAdmin}
+            />
+            <ProjectModal
+                key={editingProject ? `edit-${editingProject.id}` : 'edit-none'}
+                isOpen={!!editingProject}
+                onClose={() => setEditingProject(null)}
+                formAction={editAction}
+                formState={editState}
+                isPending={isEditPending}
+                project={editingProject}
+            />
+                </>
+            )}
+            {activeView === 'projects' && (
+                <>
+            <ProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                formAction={formAction}
+                formState={formState}
+                isPending={isPending}
+            />
+            <ImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                onImport={handleImport}
+                isImporting={isImporting}
+                result={importResult}
+                error={importError}
             />
                 </>
             )}
