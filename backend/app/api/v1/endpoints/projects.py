@@ -7,7 +7,7 @@ from app.api.deps import (
     ImportRateLimitDep,
 )
 from app.core.security.file_validation import read_import_file
-from app.models.project import ProjectStatus
+from app.models.project import ProjectStatus, Project
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectImportResponse
 from app.services.project_import import ImportParseError, parse_import_file
 from app.schemas.project_change import ProjectChangeResponse, UnreadChangesCountResponse
@@ -43,6 +43,20 @@ async def read_projects_by_status(
 ):
     """Sadece belirli bir durumdaki projeleri filtreler."""
     return await service.get_projects_by_status(project_status=project_status, skip=skip, limit=limit)
+
+@router.get("/assigned/me", response_model=list[ProjectResponse])
+async def read_my_assigned_projects(
+    service: ProjectServiceDep,
+    current_user: CurrentUserDep,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+):
+    """Giriş yapan kullanıcının sorumlu olduğu projeleri listeler."""
+    return await service.get_my_assigned_projects(
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
+    )
 
 @router.post("/import", response_model=ProjectImportResponse, status_code=status.HTTP_200_OK)
 async def import_projects_from_file(

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from app.models.project import ProjectStatus
 
@@ -7,6 +7,13 @@ class UserBrief(BaseModel):
     id: int
     username: str
     full_name: Optional[str] = None
+    model_config = {"from_attributes": True}
+
+class ProjectAssignmentSchema(BaseModel):
+    id: int
+    project_id: int
+    assigned_user_id: Optional[int] = None
+    assigned_custom_name: Optional[str] = None
     model_config = {"from_attributes": True}
 
 # ORTAK TEMEL ŞEMA
@@ -26,6 +33,8 @@ class ProjectBase(BaseModel):
     notlar: Optional[str] = Field(None, description="Ek notlar")
     risk: Optional[str] = Field(None, description="Tespit edilen riskler")
     tamamlanma: int = Field(0, description="Tamamlanma yüzdesi (0-100 arası)")
+    assigned_user_ids: Optional[List[int]] = Field(default_factory=list)
+    assigned_custom_names: Optional[List[str]] = Field(default_factory=list)
 
     @field_validator("tamamlanma")
     @classmethod
@@ -57,6 +66,8 @@ class ProjectUpdate(BaseModel):
     notlar: Optional[str] = None
     risk: Optional[str] = None
     tamamlanma: Optional[int] = None
+    assigned_user_ids: Optional[List[int]] = None
+    assigned_custom_names: Optional[List[str]] = None
 
     @field_validator("tamamlanma")
     @classmethod
@@ -72,10 +83,13 @@ class ProjectResponse(ProjectBase):
     created_at: datetime
     updated_at: datetime
     sorumlular: str = Field(default="", description="İşten sorumlu kişiler")
-    model_config = {"from_attributes": True}
     last_modified_by: Optional[UserBrief] = None
     ilgili_email: Optional[str] = None
     ilgili_telefon: Optional[str] = None
+    assignments: List[ProjectAssignmentSchema] = Field(default_factory=list)
+    assigned_user_ids: Optional[List[int]] = Field(default_factory=list, exclude=True)
+    assigned_custom_names: Optional[List[str]] = Field(default_factory=list, exclude=True)
+    model_config = {"from_attributes": True}
 
 
 class ProjectImportRow(ProjectBase):

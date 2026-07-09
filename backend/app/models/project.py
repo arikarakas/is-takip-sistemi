@@ -38,7 +38,9 @@ class Project(Base, TimestampMixin):
     guncel_sira = Column(Integer, unique=False, nullable=False)
     tamamlanma = Column(Integer, nullable=False, default=0)
     last_modified_by_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+
     last_modified_by = relationship("User", foreign_keys=[last_modified_by_id])
+    assignments = relationship("ProjectAssignment", back_populates="project", cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint('tamamlanma >= 0 AND tamamlanma <= 100', name='check_tamamlanma_range'),

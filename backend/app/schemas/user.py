@@ -40,3 +40,10 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     model_config = {"from_attributes": True}
+
+
+class UserBrief(BaseModel):
+    id: int
+    username: str
+    full_name: Optional[str] = None
+    model_config = {"from_attributes": True}

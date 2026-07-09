@@ -82,22 +82,39 @@ async function importProjects(formData) {
     return response.json();
 }
 
+function collectAssignees(formData) {
+    const assignedUserIds = formData
+        .getAll('assigned_user_ids')
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value) && value > 0);
+    const assignedCustomNames = formData
+        .getAll('assigned_custom_names')
+        .map((value) => trimValue(value))
+        .filter(Boolean);
+    const sorumlular = trimValue(formData.get('sorumlular'));
+    return { assignedUserIds, assignedCustomNames, sorumlular };
+}
+
 async function createProjectAction(prevState, formData) {
     const title = trimValue(formData.get('title'));
     const client = trimValue(formData.get('client'));
     const aksiyon = trimValue(formData.get('aksiyon'));
-    const sorumlular = trimValue(formData.get('sorumlular'));
+    const { assignedUserIds, assignedCustomNames, sorumlular } = collectAssignees(formData);
 
     if (!title) return { error: 'Proje başlığı zorunludur.', success: false };
     if (!client) return { error: 'Müşteri adı zorunludur.', success: false };
     if (!aksiyon) return { error: 'Aksiyon / sonraki adım zorunludur.', success: false };
-    if (!sorumlular) return { error: 'Sorumlu kişi(ler) zorunludur.', success: false };
+    if (!sorumlular || (assignedUserIds.length === 0 && assignedCustomNames.length === 0)) {
+        return { error: 'En az bir sorumlu kişi seçin veya özel isim ekleyin.', success: false };
+    }
 
     const payload = {
         title,
         client,
         aksiyon,
         sorumlular,
+        assigned_user_ids: assignedUserIds,
+        assigned_custom_names: assignedCustomNames,
         durum: formData.get('durum') || 'BEKLEMEDE',
         tamamlanma: Number(trimValue(formData.get('tamamlanma')) || 0),
     };
@@ -153,18 +170,22 @@ async function updateProjectAction(prevState, formData) {
     const title = trimValue(formData.get('title'));
     const client = trimValue(formData.get('client'));
     const aksiyon = trimValue(formData.get('aksiyon'));
-    const sorumlular = trimValue(formData.get('sorumlular'));
+    const { assignedUserIds, assignedCustomNames, sorumlular } = collectAssignees(formData);
 
     if (!title) return { error: 'Proje başlığı zorunludur.', success: false };
     if (!client) return { error: 'Müşteri adı zorunludur.', success: false };
     if (!aksiyon) return { error: 'Aksiyon / sonraki adım zorunludur.', success: false };
-    if (!sorumlular) return { error: 'Sorumlu kişi(ler) zorunludur.', success: false };
+    if (!sorumlular || (assignedUserIds.length === 0 && assignedCustomNames.length === 0)) {
+        return { error: 'En az bir sorumlu kişi seçin veya özel isim ekleyin.', success: false };
+    }
 
     const payload = {
         title,
         client,
         aksiyon,
         sorumlular,
+        assigned_user_ids: assignedUserIds,
+        assigned_custom_names: assignedCustomNames,
         durum: formData.get('durum') || 'BEKLEMEDE',
         tamamlanma: Number(trimValue(formData.get('tamamlanma')) || 0),
     };
@@ -200,8 +221,8 @@ function Dashboard({ currentUser, onLogout }) {
     const [selectedProject, setSelectedProject] = useState(null);
     const [editingProject, setEditingProject] = useState(null);
     const [editState, editAction, isEditPending] = useActionState(updateProjectAction, { success: false, error: null });
-    const [lastSubmittedAt, setLastSubmittedAt] = useState(0);
-    const [lastEditSubmittedAt, setLastEditSubmittedAt] = useState(0);
+    const wasCreatePendingRef = useRef(false);
+    const wasEditPendingRef = useRef(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -306,20 +327,24 @@ function Dashboard({ currentUser, onLogout }) {
     }, [activeView]);
 
     useEffect(() => {
-        if (formState?.success && isModalOpen && lastSubmittedAt > 0) {
+        const wasPending = wasCreatePendingRef.current;
+        wasCreatePendingRef.current = isPending;
+
+        if (wasPending && !isPending && formState?.success && isModalOpen) {
             loadProjects();
             setIsModalOpen(false);
-            setLastSubmittedAt(0);
         }
-    }, [formState?.success, isModalOpen, lastSubmittedAt]);
+    }, [formState?.success, isModalOpen, isPending]);
 
     useEffect(() => {
-        if (editState?.success && editingProject && lastEditSubmittedAt > 0) {
+        const wasPending = wasEditPendingRef.current;
+        wasEditPendingRef.current = isEditPending;
+
+        if (wasPending && !isEditPending && editState?.success && editingProject) {
             loadProjects();
             setEditingProject(null);
-            setLastEditSubmittedAt(0);
         }
-    }, [editState?.success, editingProject, lastEditSubmittedAt]);
+    }, [editState?.success, editingProject, isEditPending]);
 
     const priorityOptions = useMemo(() => getPriorityFilterOptions(projects), [projects]);
 
@@ -696,7 +721,6 @@ function Dashboard({ currentUser, onLogout }) {
                 formAction={formAction}
                 formState={formState}
                 isPending={isPending}
-                onSubmit={() => setLastSubmittedAt(Date.now())}
             />
             <ProjectModal
                 key={editingProject ? `edit-${editingProject.id}` : 'edit-none'}
@@ -706,7 +730,6 @@ function Dashboard({ currentUser, onLogout }) {
                 formState={editState}
                 isPending={isEditPending}
                 project={editingProject}
-                onSubmit={() => setLastEditSubmittedAt(Date.now())}
             />
             <ImportModal
                 isOpen={isImportOpen}

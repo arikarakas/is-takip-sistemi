@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 class User(Base):
@@ -12,3 +13,5 @@ class User(Base):
     role = Column(String(20), default="personel", nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     activity_last_viewed_at = Column(DateTime(timezone=True), nullable=True)
+
+    project_assignments = relationship("ProjectAssignment", back_populates="user")

@@ -1,11 +1,11 @@
 import {
-    INPUT_CLASS_NAME,
     LABEL_CLASS_NAME,
     PROJECT_STATUS_OPTIONS,
     PROJECT_URGENCY_OPTIONS,
 } from '../../constants/projects';
+import AssigneeMultiSelect from './AssigneeMultiSelect';
 
-function ProjectModal({ isOpen, onClose, formAction, formState, isPending, project = null, onSubmit }) {
+function ProjectModal({ isOpen, onClose, formAction, formState, isPending, project = null }) {
     if (!isOpen) return null;
 
     const isEditMode = !!project;
@@ -29,7 +29,7 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                         </div>
                     )}
 
-                    <form action={formAction} onSubmit={onSubmit} className="space-y-4">
+                    <form action={formAction} className="space-y-4">
                         {isEditMode && <input type="hidden" name="projectId" value={project.id} />}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,10 +56,11 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                                 <textarea name="aksiyon" rows="3" defaultValue={project?.aksiyon || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
                             </div>
 
-                            <div>
-                                <label className={LABEL_CLASS_NAME}>İŞTEN SORUMLU KİŞİ(LER) *</label>
-                                <input name="sorumlular" type="text" defaultValue={project?.sorumlular || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
-                            </div>
+                            <AssigneeMultiSelect
+                                key={isEditMode ? `assignees-${project.id}` : 'assignees-new'}
+                                initialAssignments={project?.assignments || []}
+                                fallbackSorumlular={project?.sorumlular || ''}
+                            />
 
                             <div>
                                 <label className={LABEL_CLASS_NAME}>İLGİLİ KİŞİ</label>

@@ -1,14 +1,26 @@
 from fastapi import HTTPException, status
-from sqlalchemy import null
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.project import Project, ProjectStatus
+from app.models.project_assignments import ProjectAssignment
 from app.repositories.project_repo import ProjectRepository
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectImportRow, ProjectImportResponse, ImportRowError
 from datetime import date, datetime, timezone
 import enum
-from app.models.project_changes import ProjectActions, ProjectChange
+from app.models.project_changes import ProjectActions
 from app.repositories.project_change_repo import ProjectChangeRepository
 from app.schemas.project_change import ProjectChangeResponse
+
+ASSIGNMENT_FIELDS = {"assigned_user_ids", "assigned_custom_names"}
+
+def _apply_assignments(project: Project, user_ids: list[int] | None, custom_names: list[str] | None) -> None:
+    project.assignments.clear()
+    for uid in user_ids or []:
+        project.assignments.append(ProjectAssignment(assigned_user_id=uid))
+    for name in custom_names or []:
+        if name and name.strip():
+            project.assignments.append(
+                ProjectAssignment(assigned_user_id=None, assigned_custom_name=name.strip())
+            )
 
 def _tamamlanma_for_status(durum: ProjectStatus, manual):
     """Duruma göre tamamlanma yüzdesini belirler."""
@@ -45,19 +57,20 @@ class ProjectService:
         next_sira = (await self.repo.get_max_sira()) + 1
         next_guncel = (await self.repo.get_max_guncel_sira()) + 1
 
-        project_data = data.model_dump()
+        project_data = data.model_dump(exclude=ASSIGNMENT_FIELDS)
         project_data["sira"] = next_sira
         project_data["guncel_sira"] = next_guncel
         project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)
         project_data["last_modified_by_id"] = user_id
         
         db_project = Project(**project_data)
+        _apply_assignments(db_project, data.assigned_user_ids, data.assigned_custom_names)
+
         self.repo.session.add(db_project)
         await self.repo.session.flush()
-        await self.repo.session.refresh(db_project)
+        await self.repo.session.refresh(db_project, attribute_names=["assignments", "last_modified_by"])
 
         await self.change_repo.create(project_id=db_project.id, user_id=user_id, action=ProjectActions.CREATED, changes={"title": db_project.title})
-        
         return db_project
     
     async def get_project_by_id(self, project_id: int):
@@ -77,10 +90,17 @@ class ProjectService:
     async def get_projects_by_status(self, project_status: ProjectStatus, skip: int = 0, limit: int = 100):
         """Belirli bir durumdaki projeleri filtreler."""
         return await self.repo.get_by_status(status=project_status, skip=skip, limit=limit)
+
+    async def get_my_assigned_projects(self, user_id: int, skip: int = 0, limit: int = 100):
+        """Giriş yapan kullanıcıya atanan projeleri getirir."""
+        return await self.repo.get_assigned_to_user(user_id=user_id, skip=skip, limit=limit)
     
     async def update_project(self, project_id, data: ProjectUpdate, user_id: int):
         project = await self.get_project_by_id(project_id)
         update_data = data.model_dump(exclude_unset=True)
+
+        user_ids = update_data.pop("assigned_user_ids", None)
+        custom_names = update_data.pop("assigned_custom_names", None)
 
         new_durum = update_data.get("durum", project.durum)
         if "durum" in update_data:
@@ -88,12 +108,27 @@ class ProjectService:
                 new_durum,
                 update_data.get("tamamlanma", project.tamamlanma),
             )
+
         changes = _build_changes(project, update_data)
         project.last_modified_by_id = user_id
-        updated = await self.repo.update(project, ProjectUpdate(**update_data))
 
+        for field, value in update_data.items():
+            setattr(project, field, value)
+        
+        if user_ids is not None or custom_names is not None:
+            _apply_assignments(
+                project,
+                user_ids if user_ids is not None else [
+                    a.assigned_user_id for a in project.assignments if a.assigned_user_id
+                ],
+                custom_names if custom_names is not None else [
+                    a.assigned_custom_name for a in project.assignments if a.assigned_custom_name
+                ],
+            )
+
+        await self.repo.session.flush()
         await self.change_repo.create(project_id=project_id, user_id=user_id, action=ProjectActions.UPDATED, changes=changes or None)
-        return updated
+        return await self.get_project_by_id(project_id)
     
     async def delete_project(self, project_id: int) -> None:
         """Projeyi sistemden siler."""
@@ -112,7 +147,7 @@ class ProjectService:
         next_guncel = (await self.repo.get_max_guncel_sira()) + 1
 
         for data in rows:
-            project_data = data.model_dump()
+            project_data = data.model_dump(exclude=ASSIGNMENT_FIELDS)
             project_data["sira"] = data.sira if data.sira is not None else next_sira
             project_data["guncel_sira"] = data.guncel_sira if data.guncel_sira is not None else next_guncel
             project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)

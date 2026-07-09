@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 
-from app.api.deps import AdminUserDep, DatabaseDep
+from app.api.deps import AdminUserDep, CurrentUserDep, DatabaseDep
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.core.security.rate_limit import make_rate_limiter
 from app.models import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserBrief, UserCreate, UserResponse, UserUpdate
 
 router = APIRouter(
     dependencies=[
@@ -19,6 +19,20 @@ router = APIRouter(
         )
     ]
 )
+
+
+@router.get("/brief", response_model=list[UserBrief])
+async def list_users_brief(
+    db: DatabaseDep,
+    _: CurrentUserDep,
+):
+    """Aktif kullanıcıların kısa listesini döner (atama seçici için)."""
+    result = await db.execute(
+        select(User)
+        .where(User.is_active.is_(True))
+        .order_by(User.full_name.nulls_last(), User.username)
+    )
+    return result.scalars().all()
 
 
 @router.get("/", response_model=list[UserResponse])
