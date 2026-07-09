@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@theme {
+    --animate-menu-slide-up: menu-slide-up 0.2s ease-out forwards;
+
+    @keyframes menu-slide-up {
+        from {
+            opacity: 0;
+            transform: translateY(0.5rem);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}

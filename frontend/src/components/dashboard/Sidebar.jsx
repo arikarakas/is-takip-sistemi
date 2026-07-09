@@ -1,4 +1,5 @@
 import ShinyText from './ShinyText';
+import UserProfileMenu from './UserProfileMenu';
 
 function ChevronIcon({ className }) {
     return (
@@ -176,9 +177,7 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                 </div>
 
                 <div className={`p-6 pt-4 border-t border-slate-800 text-xs text-slate-400 ${isOpen ? '' : 'md:px-3'}`}>
-                    <p className={`transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden md:hidden'}`}>
-                        Oturum Açan: <span className="font-bold text-slate-200">{currentUser?.full_name || currentUser?.username || '—'}</span>
-                    </p>
+                    <UserProfileMenu currentUser={currentUser} isSidebarOpen={isOpen} />
                     <button
                         type="button"
                         onClick={onLogout}
@@ -186,7 +185,7 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                         className={`bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 py-2 rounded-lg font-semibold transition cursor-pointer flex items-center gap-2 ${
                             isOpen
                                 ? 'mt-3 w-full px-3 justify-center'
-                                : 'mt-0 md:mt-0 w-full md:w-10 md:h-10 md:p-0 md:justify-center'
+                                : 'mt-3 md:mt-3 w-full md:w-10 md:h-10 md:p-0 md:justify-center md:mx-auto'
                         }`}
                     >
                         <LogoutIcon className="w-4 h-4 shrink-0" />

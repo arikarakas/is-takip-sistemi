@@ -53,3 +53,21 @@ export async function fetchCurrentUser() {
 
     return response.json();
 }
+
+export async function changePassword(currentPassword, newPassword) {
+    const response = await apiFetch(`${API_ROOT}/auth/change-password`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(parseApiError(errorData.detail, 'Şifre değiştirilemedi.'));
+    }
+
+    return response.json();
+}
