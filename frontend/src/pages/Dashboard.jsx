@@ -797,7 +797,7 @@ function Dashboard({ currentUser, onLogout }) {
                         viewMode === 'table'
                             ? <ProjectTable 
                                 projects={sortedProjects} 
-                                onRowClick={setSelectedProject} 
+                                onRowClick={setSelectedProject}
                                 sortKey={sortKey} 
                                 sortDirection={sortDirection}
                                 onSort={handleSort}

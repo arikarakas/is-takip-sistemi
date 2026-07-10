@@ -4,6 +4,9 @@ import {
     STICKY_COLUMN_OFFSETS,
 } from '../../constants/projects';
 import ProjectCell from './ProjectCell';
+import { Fragment, useState } from 'react';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AnimatedCollapse } from './Accordion';
+import ProjectAksiyonHistory from './ProjectAksiyonHistory';
 
 function getStickyCellClass(key, { isHeader = false, isEvenRow = false, isCompleted = false } = {}) {
     if (!(key in STICKY_COLUMN_OFFSETS)) return '';
@@ -28,6 +31,14 @@ function isProjectCompleted(project) {
 }
 
 function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) {
+
+    const [hoveredProjectId, setHoveredProjectId] = useState(null);
+    const [expandedProjectId, setExpandedProjectId] = useState(null);
+
+    function toggleProjectHistory(projectId) {
+        setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
+    }
+
     return (
         <div className="w-full min-w-0 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/60">
@@ -76,28 +87,69 @@ function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) 
                         <tbody>
                             {projects.map((project, rowIndex) => {
                                 const isCompleted = isProjectCompleted(project);
+                                const isHovered = hoveredProjectId === project.id;
+                                const isExpanded = expandedProjectId === project.id;
                                 return (
-                                <tr
-                                    key={project.id}
-                                    onClick={() => onRowClick(project)}
-                                    className={`group border-b border-slate-100/80 transition-colors cursor-pointer ${
-                                        isCompleted
-                                            ? 'bg-emerald-100/90 hover:bg-emerald-50'
-                                            : rowIndex % 2 === 1
-                                                ? 'bg-slate-50/40 hover:bg-slate-50/90'
-                                                : 'bg-white hover:bg-slate-50/90'
-                                    }`}
-                                >
-                                    {PROJECT_TABLE_COLUMNS.map((col) => (
-                                        <td
-                                            key={col.key}
-                                            style={getStickyStyle(col.key)}
-                                            className={`py-3 px-5 align-middle text-sm text-slate-600 ${getStickyCellClass(col.key, { isEvenRow: rowIndex % 2 === 1, isCompleted })} ${col.key === 'notlar' ? 'max-w-0' : ''}`}
+                                    <Fragment key={project.id}>
+                                        <tr
+                                            onMouseEnter={() => setHoveredProjectId(project.id)}
+                                            onMouseLeave={() => setHoveredProjectId(null)}
+                                            onClick={(e) => {
+                                                if (e.target.closest('[data-sira-cell]') && hoveredProjectId === project.id) return;
+                                                onRowClick(project);
+                                            }}
+                                            className={`group border-b border-slate-100/80 transition-colors cursor-pointer ${
+                                                isExpanded
+                                                    ? 'bg-amber-50/60'
+                                                    : isCompleted
+                                                        ? 'bg-emerald-100/90 hover:bg-emerald-50'
+                                                        : rowIndex % 2 === 1
+                                                            ? 'bg-slate-50/40 hover:bg-slate-50/90'
+                                                            : 'bg-white hover:bg-slate-50/90'
+                                            }`}
                                         >
-                                            <ProjectCell project={project} columnKey={col.key} />
-                                        </td>
-                                    ))}
-                                </tr>
+                                            {PROJECT_TABLE_COLUMNS.map((col) => {
+                                                const isSiraCell = col.key === 'sira';
+                                                return (
+                                                <td
+                                                    key={col.key}
+                                                    data-sira-cell={isSiraCell || undefined}
+                                                    style={getStickyStyle(col.key)}
+                                                    onClick={(e) => {
+                                                        if (isSiraCell && isHovered) {
+                                                            e.stopPropagation();
+                                                            toggleProjectHistory(project.id);
+                                                        }
+                                                    }}
+                                                    className={`align-middle text-sm text-slate-600 ${isSiraCell ? `relative h-px p-0 overflow-hidden ${isHovered ? 'z-3 cursor-pointer hover:bg-amber-100/90 duration-125 ease-in' : ''} ${isExpanded ? 'bg-amber-100/90' : ''}` : 'py-3 px-5'} ${getStickyCellClass(col.key, { isEvenRow: rowIndex % 2 === 1, isCompleted })} ${col.key === 'notlar' ? 'max-w-0' : ''}`}
+                                                >
+                                                    <ProjectCell project={project} columnKey={col.key} isHovered={isHovered} />
+                                                </td>
+                                                );
+                                            })}
+                                        </tr>
+                                        <tr className={isExpanded ? '' : 'pointer-events-none'}>
+                                            <td colSpan={PROJECT_TABLE_COLUMNS.length} className="p-0">
+                                                <AnimatedCollapse open={isExpanded}>
+                                                    <div className="border-b border-amber-100 bg-amber-50/40">
+                                                        <Accordion type="single" collapsible defaultValue="gecmis">
+                                                            <AccordionItem value="gecmis" className="border-0 rounded-none bg-transparent">
+                                                                <AccordionTrigger className="px-5 py-3 text-amber-900 hover:bg-amber-50/80">
+                                                                    {project.title} — Aksiyon Geçmişi
+                                                                </AccordionTrigger>
+                                                                <AccordionContent contentClassName="p-0 text-slate-600">
+                                                                    <ProjectAksiyonHistory
+                                                                        projectId={project.id}
+                                                                        isActive={isExpanded}
+                                                                    />
+                                                                </AccordionContent>
+                                                            </AccordionItem>
+                                                        </Accordion>
+                                                    </div>
+                                                </AnimatedCollapse>
+                                            </td>
+                                        </tr>
+                                    </Fragment>
                                 );
                             })}
                         </tbody>

@@ -1,6 +1,7 @@
 import { STATUS_STYLES } from '../../constants/projects';
 import { formatDateTR } from '../../utils/date';
 import ProgressBar from './ProgressBar';
+import SiraFlipCell from './SiraFlipCell';
 
 function emptyCell(value) {
     if (value == null || value === '') {
@@ -23,13 +24,14 @@ function getAciliyetStyle(value) {
     return 'bg-violet-50 text-violet-700 border-violet-100';
 }
 
-function ProjectCell({ project, columnKey }) {
+function ProjectCell({ project, columnKey, isHovered }) {
     switch (columnKey) {
         case 'sira':
             return (
-                <span className="inline-flex items-center justify-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 text-xs font-bold text-slate-500 tabular-nums">
-                    {project.sira}
-                </span>
+                <SiraFlipCell
+                    project={project}
+                    isHovered={isHovered}
+                />
             );
         case 'title':
             return <span className="font-semibold text-slate-800 leading-snug">{project.title}</span>;
