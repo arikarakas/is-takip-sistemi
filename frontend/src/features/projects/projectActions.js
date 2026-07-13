@@ -50,7 +50,6 @@ function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, s
 function validateProjectFields({ title, client, aksiyon, sorumlular, assignedUserIds, assignedCustomNames }) {
     if (!title) return 'Proje başlığı zorunludur.';
     if (!client) return 'Müşteri adı zorunludur.';
-    if (!aksiyon) return 'Aksiyon / sonraki adım zorunludur.';
     if (!sorumlular || (assignedUserIds.length === 0 && assignedCustomNames.length === 0)) {
         return 'En az bir sorumlu kişi seçin veya özel isim ekleyin.';
     }

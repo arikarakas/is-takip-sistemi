@@ -52,10 +52,9 @@ function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeletin
 
                 <div className="overflow-y-auto px-6 py-5 space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <DetailField label="MÜŞTERİ / PROJE" value={project.client} />
+                        <DetailField label="MÜŞTERİ" value={project.client} />
                         <DetailField label="SORUMLU KİŞİ(LER)" value={project.sorumlular} />
-                        <DetailField label="İLGİLİ KİŞİ" value={project.ilgili} />
-                        <DetailField label="HEDEF TARİH" value={formatDateTR(project.hedef_tarih)} />
+                        <DetailField label="MÜŞTERİ İLGİLİ KİŞİ" value={project.ilgili} />
                         <DetailField 
                             label="İLGİLİ KİŞİ BİLGİ" 
                             value={
@@ -73,22 +72,17 @@ function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeletin
                                 </>
                             }
                         />
-                        <DetailField label="ÖNCELİK" value={project.oncelik != null ? `P${project.oncelik}` : null} />
-                        <DetailField label="GÜNCEL SIRA" value={project.guncel_sira} />
+                        <DetailField label="HEDEF TARİH" value={formatDateTR(project.hedef_tarih)} />
+                        <DetailField label="TAMAMLANMA TARİHİ" value={formatDateTR(project.tamamlanma_tarih)} />
                         <DetailField label="SON DEĞİŞİKLİĞİ YAPAN" value={project.last_modified_by?.full_name || project.last_modified_by?.username}/>
                     </div>
 
-                    <div>
-                        <p className={`${labelClassName} mb-2`}>TAMAMLANMA</p>
-                        <ProgressBar value={project.tamamlanma} />
-                    </div>
-
-                    <DetailField label="AKSIYON / SONRAKI ADIM" value={project.aksiyon} />
+                    <DetailField label="YAPILACAK İŞ" value={project.aksiyon} />
+                    <DetailField label="MÜŞTERİ TALEBİ" value={project.talep} />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <DetailField label="ACİLİYET" value={project.aciliyet} />
-                        <DetailField label="BEKLENEN ÇIKTı" value={project.beklenen} />
-                        <DetailField label="RİSK / BAĞIMLIK" value={project.risk} />
+                        <DetailField label="HEDEF" value={project.beklenen} />
                     </div>
 
                     <div>

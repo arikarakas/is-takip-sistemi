@@ -22,12 +22,14 @@ class ProjectBase(BaseModel):
     aciliyet: Optional[str] = Field(None, max_length=30, description="Aciliyet durumu")
     title: str = Field(..., min_length=1, max_length=200, description="İş / Konu Başlığı")
     client: str = Field(..., min_length=1, max_length=200, description="Müşteri Adı")
-    aksiyon: str = Field(..., min_length=1, description="Aksiyon / Sonraki Adım")
+    aksiyon: Optional[str] = Field(None, min_length=1, description="Yapılacak İş")
+    talep: Optional[str] = Field(None, min_length=1, description="Müşteri talebi")
     sorumlular: str = Field(..., min_length=1, description="İşten sorumlu kişiler")
     ilgili: Optional[str] = Field(None, max_length=150, description="İlgili diğer kişiler")
     ilgili_email: Optional[str] = Field(None, max_length=100, description="İlgili kişi e-posta")
     ilgili_telefon: Optional[str] = Field(None, max_length=100, description="İlgili kişi telefon")
     hedef_tarih: Optional[date] = Field(None, description="Hedef bitiş tarihi (YYYY-MM-DD)")
+    tamamlanma_tarih: Optional[date] = Field(None, description="Tamamlanma tarihi")
     durum: ProjectStatus = Field(ProjectStatus.BEKLEMEDE, description="İşin güncel durumu")
     beklenen: Optional[str] = Field(None, description="Beklenen aksiyon/durum")
     notlar: Optional[str] = Field(None, description="Ek notlar")
@@ -56,11 +58,13 @@ class ProjectUpdate(BaseModel):
     title: Optional[str] = None
     client: Optional[str] = None
     aksiyon: Optional[str] = None
+    talep: Optional[str] = None
     sorumlular: Optional[str] = None
     ilgili: Optional[str] = None
     ilgili_email: Optional[str] = None
     ilgili_telefon: Optional[str] = None
     hedef_tarih: Optional[date] = None
+    tamamlanma_tarih: Optional[date] = None
     durum: Optional[ProjectStatus] = None
     beklenen: Optional[str] = None
     notlar: Optional[str] = None

@@ -5,20 +5,20 @@ export const TIME_FILTER_MODES = [
     { step: 4, shortLabel: '1 Hafta', label: 'Önümüzdeki 1 Hafta', emoji: '⏳' },
 ];
 
-export function getPriorityFilterOptions(projects) {
-    const levels = [...new Set(
-        projects
-            .map((project) => project.oncelik)
-            .filter((value) => value != null && value !== '')
-            .map(Number)
-            .filter((level) => !Number.isNaN(level)),
-    )].sort((a, b) => a - b);
+export function getUrgencyFilterOptions(projects) {
+    const levels = [
+        ...new Set(
+            projects
+                .map((project) => project.aciliyet)
+                .filter((value) => value != null && value !== '')
+        ),
+    ];
 
     return [
-        { value: 'TÜMÜ', label: 'Tüm Öncelikler' },
+        { value: 'TÜMÜ', label: 'Tüm Aciliyetler' },
         ...levels.map((level) => ({
-            value: `P${level}`,
-            label: `P${level}`,
+            value: level,
+            label: level,
         })),
     ];
 }
@@ -63,14 +63,16 @@ export function matchesTimeFilter(hedefTarih, step) {
     }
 }
 
-export function matchesPriorityFilter(oncelik, filter) {
+export function matchesUrgencyFilter(aciliyet, filter) {
     if (filter === 'TÜMÜ') return true;
-    if (oncelik == null) return false;
+    if (!aciliyet) return false;
 
-    const level = Number(filter.replace('P', ''));
-    return Number(oncelik) === level;
+    // filter and aciliyet values are typically strings like 'Çok Acil', 'Acil', 'Normal' etc.
+    // Case-insensitive and whitespace-insensitive comparison
+    const normalize = str => String(str).toLocaleLowerCase('tr-TR').replace(/\s+/g, '');
+    return normalize(aciliyet) === normalize(filter);
 }
 
-export function hasAdvancedFiltersActive(isTimeFilterActive, priorityFilter) {
-    return isTimeFilterActive || priorityFilter !== 'TÜMÜ';
+export function hasAdvancedFiltersActive(isTimeFilterActive, urgencyFilter) {
+    return isTimeFilterActive || urgencyFilter !== 'TÜMÜ';
 }

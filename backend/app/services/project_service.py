@@ -5,6 +5,7 @@ from app.models.project_assignments import ProjectAssignment
 from app.repositories.project_repo import ProjectRepository
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectImportRow, ProjectImportResponse, ImportRowError
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 import enum
 from app.models.project_changes import ProjectActions
 from app.repositories.project_change_repo import ProjectChangeRepository
@@ -47,6 +48,12 @@ def _build_changes(project, update_data: dict) -> dict:
             changes[field] = {"old": old_serialized, "new": new_serialized}
     return changes
 
+def tamamlanma_tarihi(durum: ProjectStatus):
+    """Proje tamamlandı durumuna getirilirse o günü tarihini döndürür."""
+    if durum == ProjectStatus.TAMAMLANDI:
+        return datetime.now(ZoneInfo("Europe/Istanbul")).date()
+    return None
+
 class ProjectService:
     def __init__(self, db: AsyncSession) -> None:
         self.repo = ProjectRepository(db)
@@ -61,6 +68,7 @@ class ProjectService:
         project_data["sira"] = next_sira
         project_data["guncel_sira"] = next_guncel
         project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)
+        project_data["tamamlanma_tarih"] = tamamlanma_tarihi(data.durum)
         project_data["last_modified_by_id"] = user_id
         
         db_project = Project(**project_data)
@@ -104,10 +112,7 @@ class ProjectService:
 
         new_durum = update_data.get("durum", project.durum)
         if "durum" in update_data:
-            update_data["tamamlanma"] = _tamamlanma_for_status(
-                new_durum,
-                update_data.get("tamamlanma", project.tamamlanma),
-            )
+            update_data["tamamlanma_tarih"] = tamamlanma_tarihi(new_durum)
 
         changes = _build_changes(project, update_data)
         project.last_modified_by_id = user_id
@@ -151,6 +156,7 @@ class ProjectService:
             project_data["sira"] = data.sira if data.sira is not None else next_sira
             project_data["guncel_sira"] = data.guncel_sira if data.guncel_sira is not None else next_guncel
             project_data["tamamlanma"] = _tamamlanma_for_status(data.durum, data.tamamlanma)
+            project_data["tamamlanma_tarih"] = tamamlanma_tarihi(data.durum)
             project_data["last_modified_by_id"] = None
 
             self.repo.session.add(Project(**project_data))

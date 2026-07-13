@@ -34,12 +34,12 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
-                                <label className={LABEL_CLASS_NAME}>PROJE BAŞLIĞI *</label>
+                                <label className={LABEL_CLASS_NAME}>PROJE ADI *</label>
                                 <input name="title" type="text" defaultValue={project?.title || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>
 
                             <div>
-                                <label className={LABEL_CLASS_NAME}>PROJE / MÜŞTERİ *</label>
+                                <label className={LABEL_CLASS_NAME}>MÜŞTERİ ADI *</label>
                                 <input name="client" type="text" defaultValue={project?.client || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>
 
@@ -52,8 +52,12 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                                 </select>
                             </div>
                             <div className="md:col-span-2">
-                                <label className={LABEL_CLASS_NAME}>AKSİYON / SONRAKİ ADIM *</label>
-                                <textarea name="aksiyon" rows="3" defaultValue={project?.aksiyon || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
+                                <label className={LABEL_CLASS_NAME}>YAPILACAK İŞ</label>
+                                <textarea name="aksiyon" defaultValue={project?.aksiyon || ''} className="w-full rounded-xl border field-sizing-content min-h-15 border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className={LABEL_CLASS_NAME}>MÜŞTERİ TALEBİ</label>
+                                <textarea name="talep" defaultValue={project?.talep || ''} className="w-full rounded-xl border field-sizing-content min-h-15 border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
                             </div>
 
                             <AssigneeMultiSelect
@@ -63,7 +67,7 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                             />
 
                             <div>
-                                <label className={LABEL_CLASS_NAME}>İLGİLİ KİŞİ</label>
+                                <label className={LABEL_CLASS_NAME}>MÜŞTERİ İLGİLİ KİŞİ</label>
                                 <input name="ilgili" type="text" defaultValue={project?.ilgili || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>
 
@@ -75,11 +79,6 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                             <div>
                                 <label className={LABEL_CLASS_NAME}>İLGİLİ KİŞİ TELEFON</label>
                                 <input name="ilgili_telefon" type="text" defaultValue={project?.ilgili_telefon || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
-                            </div>
-
-                            <div>
-                                <label className={LABEL_CLASS_NAME}>ÖNCELİK</label>
-                                <input name="oncelik" type="number" min="1" placeholder="Örn: 1" defaultValue={project?.oncelik || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>
 
                             <div>
@@ -97,23 +96,13 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                             </div>
 
                             <div>
-                                <label className={LABEL_CLASS_NAME}>TAMAMLANMA (%)</label>
-                                <input name="tamamlanma" type="number" min="0" max="100" defaultValue={project?.tamamlanma ?? 0} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
-                            </div>
-
-                            <div>
-                                <label className={LABEL_CLASS_NAME}>BEKLENEN ÇIKTI</label>
+                                <label className={LABEL_CLASS_NAME}>HEDEF</label>
                                 <input name="beklenen" type="text" defaultValue={project?.beklenen || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
-                            </div>
-
-                            <div>
-                                <label className={LABEL_CLASS_NAME}>RİSK / BAĞIMLILIK</label>
-                                <input name="risk" type="text" defaultValue={project?.risk || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500" />
                             </div>
 
                             <div className="md:col-span-2">
                                 <label className={LABEL_CLASS_NAME}>NOTLAR</label>
-                                <textarea name="notlar" rows="3" defaultValue={project?.notlar || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
+                                <textarea name="notlar" defaultValue={project?.notlar || ''} className="w-full rounded-xl field-sizing-content min-h-10 border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none focus:bg-white focus:border-blue-500 resize-none" />
                             </div>
                         </div>
 

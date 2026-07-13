@@ -6,7 +6,6 @@ from app.core.database import Base
 
 class ProjectStatus(str, enum.Enum):
     BEKLEMEDE = "BEKLEMEDE"
-    AÇIK = "AÇIK"
     DEVAM_EDİYOR = "DEVAM EDİYOR"
     TAMAMLANDI = "TAMAMLANDI"
 
@@ -20,12 +19,14 @@ class Project(Base, TimestampMixin):
     aciliyet = Column(String(30), unique=False)
     title = Column(String(200), index=True, nullable=False)
     client = Column(String(200), index=True, nullable=False)
-    aksiyon = Column(Text, nullable=False)
+    aksiyon = Column(Text, nullable=True)
+    talep = Column(Text, nullable=True)
     sorumlular = Column(Text, nullable=False)
     ilgili = Column(String(150), nullable=True)
     ilgili_email = Column(String(100))
     ilgili_telefon = Column(String(100), nullable=True)
     hedef_tarih = Column(Date, nullable=True)
+    tamamlanma_tarih = Column(Date, nullable=True)
     durum = Column(
         Enum(ProjectStatus, values_callable=lambda statuses: [status.value for status in statuses]),
         default=ProjectStatus.BEKLEMEDE,

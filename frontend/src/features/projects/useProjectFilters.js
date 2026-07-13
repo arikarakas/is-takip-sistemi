@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { matchesTimeFilter, matchesPriorityFilter, getPriorityFilterOptions } from '../../utils/projectFilters';
+import { matchesTimeFilter, matchesUrgencyFilter, getUrgencyFilterOptions } from '../../utils/projectFilters';
 import { sortProjects } from '../../utils/projectSort';
 
 export function useProjectFilters(projects) {
@@ -8,16 +8,16 @@ export function useProjectFilters(projects) {
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
     const [isTimeFilterActive, setIsTimeFilterActive] = useState(false);
     const [timeSliderStep, setTimeSliderStep] = useState(2);
-    const [priorityFilter, setPriorityFilter] = useState('TÜMÜ');
+    const [urgencyFilter, setUrgencyFilter] = useState('TÜMÜ');
 
-    const priorityOptions = useMemo(() => getPriorityFilterOptions(projects), [projects]);
+    const urgencyOptions = useMemo(() => getUrgencyFilterOptions(projects), [projects]);
 
     useEffect(() => {
-        const validValues = new Set(priorityOptions.map((option) => option.value));
-        if (!validValues.has(priorityFilter)) {
-            setPriorityFilter('TÜMÜ');
+        const validValues = new Set(urgencyOptions.map((option) => option.value));
+        if (!validValues.has(urgencyFilter)) {
+            setUrgencyFilter('TÜMÜ');
         }
-    }, [priorityOptions, priorityFilter]);
+    }, [urgencyOptions, urgencyFilter]);
 
     const filteredProjects = useMemo(() => {
         const statusFiltered = projects.filter((project) => {
@@ -38,16 +38,16 @@ export function useProjectFilters(projects) {
 
             if (!matchesSearch) return false;
             if (isTimeFilterActive && !matchesTimeFilter(project.hedef_tarih, timeSliderStep)) return false;
-            if (!matchesPriorityFilter(project.oncelik, priorityFilter)) return false;
+            if (!matchesUrgencyFilter(project.aciliyet, urgencyFilter)) return false;
 
             return true;
         });
-    }, [projects, statusFilter, searchTerm, isTimeFilterActive, timeSliderStep, priorityFilter]);
+    }, [projects, statusFilter, searchTerm, isTimeFilterActive, timeSliderStep, urgencyFilter]);
 
     function resetAdvancedFilters() {
         setIsTimeFilterActive(false);
         setTimeSliderStep(2);
-        setPriorityFilter('TÜMÜ');
+        setUrgencyFilter('TÜMÜ');
     }
 
     return {
@@ -61,9 +61,9 @@ export function useProjectFilters(projects) {
         setIsTimeFilterActive,
         timeSliderStep,
         setTimeSliderStep,
-        priorityFilter,
-        setPriorityFilter,
-        priorityOptions,
+        urgencyFilter,
+        setUrgencyFilter,
+        urgencyOptions,
         filteredProjects,
         resetAdvancedFilters,
     };

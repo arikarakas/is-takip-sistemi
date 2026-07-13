@@ -135,7 +135,7 @@ function ProjectTable({ projects, onRowClick, sortKey, sortDirection, onSort }) 
                                                         <Accordion type="single" collapsible defaultValue="gecmis">
                                                             <AccordionItem value="gecmis" className="border-0 rounded-none bg-transparent">
                                                                 <AccordionTrigger className="px-5 py-3 text-amber-900 hover:bg-amber-50/80">
-                                                                    {project.title} — Aksiyon Geçmişi
+                                                                    {project.title} — Yapılan İş Geçmişi
                                                                 </AccordionTrigger>
                                                                 <AccordionContent contentClassName="p-0 text-slate-600">
                                                                     <ProjectAksiyonHistory

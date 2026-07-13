@@ -9,6 +9,7 @@ import SplitText from '../../components/dashboard/SplitText';
 import ShinyText from '../../components/dashboard/ShinyText';
 import { createProjectAction } from './projectActions';
 import { useProjectFilters } from './useProjectFilters';
+import { PROJECT_STATUS_OPTIONS } from '../../constants/projects';
 
 export default function ProjectsView({
     projects,
@@ -45,9 +46,9 @@ export default function ProjectsView({
         setIsTimeFilterActive,
         timeSliderStep,
         setTimeSliderStep,
-        priorityFilter,
-        setPriorityFilter,
-        priorityOptions,
+        urgencyFilter,
+        setUrgencyFilter,
+        urgencyOptions,
         filteredProjects,
         resetAdvancedFilters,
     } = useProjectFilters(projects);
@@ -166,7 +167,7 @@ export default function ProjectsView({
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-4">
                     <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 select-none w-fit">
-                        {['HEPSİ', 'AÇIK', 'BEKLEMEDE', 'DEVAM EDİYOR', 'TAMAMLANDI'].map((status) => {
+                        {['HEPSİ', ...PROJECT_STATUS_OPTIONS.map((option) => option.value)].map((status) => {
                             const isActive = statusFilter === status;
 
                             return (
@@ -194,9 +195,9 @@ export default function ProjectsView({
                         onTimeFilterActiveChange={setIsTimeFilterActive}
                         timeSliderStep={timeSliderStep}
                         onTimeSliderStepChange={setTimeSliderStep}
-                        priorityFilter={priorityFilter}
-                        onPriorityFilterChange={setPriorityFilter}
-                        priorityOptions={priorityOptions}
+                        urgencyFilter={urgencyFilter}
+                        onUrgencyFilterChange={setUrgencyFilter}
+                        urgencyOptions={urgencyOptions}
                         onReset={resetAdvancedFilters}
                     />
                     {unreadChangesCount > 0 && (

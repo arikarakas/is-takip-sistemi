@@ -35,6 +35,8 @@ function ProjectCell({ project, columnKey, isHovered }) {
             );
         case 'title':
             return <span className="font-semibold text-slate-800 leading-snug">{project.title}</span>;
+        case 'client':
+            return <span className="font-semibold text-slate-800 leading-snug">{project.client}</span>;
         case 'durum':
             return (
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border whitespace-nowrap ${STATUS_STYLES[project.durum] || STATUS_STYLES.BEKLEMEDE}`}>
@@ -55,9 +57,19 @@ function ProjectCell({ project, columnKey, isHovered }) {
                 ? <span className="font-bold tabular-nums text-slate-600 whitespace-nowrap">{formatted}</span>
                 : emptyCell(null);
         }
+        case 'tamamlanma_tarih': {
+            const formatted = formatDateTR(project.tamamlanma_tarih);
+            return formatted
+                ? <span className="font-bold tabular-nums text-slate-600 whitespace-nowrap">{formatted}</span>
+                : emptyCell(null);
+        }
         case 'aksiyon':
             return project.aksiyon
                 ? <span className="leading-snug line-clamp-2 wrap-break-words whitespace-normal" title={project.aksiyon}>{project.aksiyon}</span>
+                : emptyCell(null);
+        case 'talep':
+            return project.aksiyon
+                ? <span className="leading-snug line-clamp-2 wrap-break-words whitespace-normal" title={project.talep}>{project.talep}</span>
                 : emptyCell(null);
         case 'notlar':
             return project.notlar

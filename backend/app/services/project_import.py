@@ -72,9 +72,9 @@ HEADER_KEYWORDS = [
 
 DURUM_MAP: dict[str, ProjectStatus] = {
     "beklemede": ProjectStatus.BEKLEMEDE,
-    "açık": ProjectStatus.AÇIK,
-    "acik": ProjectStatus.AÇIK,
-    "teklif": ProjectStatus.AÇIK,
+    "açık": ProjectStatus.BEKLEMEDE,
+    "acik": ProjectStatus.BEKLEMEDE,
+    "teklif": ProjectStatus.BEKLEMEDE,
     "devam ediyor": ProjectStatus.DEVAM_EDİYOR,
     "devam edıyor": ProjectStatus.DEVAM_EDİYOR,
     "tamamlandı": ProjectStatus.TAMAMLANDI,
@@ -348,7 +348,7 @@ def parse_import_file(
     column_map = build_column_map(list(data_df.columns))
     missing_required = [
         field
-        for field in ("title", "client", "aksiyon", "sorumlular")
+        for field in ("title", "client", "sorumlular")
         if field not in column_map or not column_map[field]
     ]
     if missing_required:
@@ -371,8 +371,6 @@ def parse_import_file(
                 raise ValueError("Proje başlığı boş olamaz.")
             if not raw_data["client"]:
                 raise ValueError("Müşteri adı boş olamaz.")
-            if not raw_data["aksiyon"]:
-                raise ValueError("Aksiyon / sonraki adım boş olamaz.")
             if not raw_data["sorumlular"]:
                 raise ValueError("Sorumlu kişi(ler) boş olamaz.")
 
