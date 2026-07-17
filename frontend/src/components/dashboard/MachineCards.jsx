@@ -29,7 +29,7 @@ function MachineCard({ machine, onClick }) {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800 mt-3 tracking-tight">{machine.ocak}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                    {[machine.marka, machine.tip].filter(Boolean).join(' · ') || 'Tip belirtilmemiş'}
+                    {[machine.marka, machine.tip, machine.manuel_kod].filter(Boolean).join(' || ') || 'Tip belirtilmemiş'}
                 </p>
             </div>
             <div className={`mt-6 pt-4 border-t flex justify-end ${isCompleted ? 'border-emerald-200' : 'border-slate-200'}`}>

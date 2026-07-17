@@ -147,7 +147,7 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                 Bana Atananlar
                             </span>
                         </button>
-                        {/* <button
+                        <button
                             type="button"
                             onClick={() => onNavigate?.('machines')}
                             title="Bakım Yerleri Makineleri"
@@ -168,7 +168,7 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                             <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
                                 Makineler
                             </span>
-                        </button> */}
+                        </button>
 
                         {isAdmin && (
                             <button
