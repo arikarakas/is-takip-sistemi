@@ -68,7 +68,7 @@ function ProjectCell({ project, columnKey, isHovered }) {
                 ? <span className="leading-snug line-clamp-2 wrap-break-words whitespace-normal" title={project.aksiyon}>{project.aksiyon}</span>
                 : emptyCell(null);
         case 'talep':
-            return project.aksiyon
+            return project.talep
                 ? <span className="leading-snug line-clamp-2 wrap-break-words whitespace-normal" title={project.talep}>{project.talep}</span>
                 : emptyCell(null);
         case 'notlar':

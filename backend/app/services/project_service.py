@@ -180,7 +180,7 @@ class ProjectService:
             errors=errors,
         )
     
-    async def get_recent_changes(self, limit: int=30) -> list[ProjectChangeResponse]:
+    async def get_recent_changes(self, limit: int = 30) -> list[ProjectChangeResponse]:
         rows = await self.change_repo.get_recent(limit=limit)
         result = []
 
@@ -200,12 +200,20 @@ class ProjectService:
             ))
         return result
 
-    async def get_unread_changes_count(self, activity_last_viewed_at: datetime | None, user_id: int) -> int:
+    async def get_unread_changes_count(
+        self,
+        activity_last_viewed_at: datetime | None,
+        user_id: int,
+        *,
+        user_role: str = "admin",
+    ) -> int:
         if activity_last_viewed_at is None:
             return 0
+        assigned_user_id = user_id if user_role == "personel" else None
         return await self.change_repo.count_since(
             activity_last_viewed_at,
             exclude_user_id=user_id,
+            assigned_user_id=assigned_user_id,
         )
 
     async def mark_changes_viewed(self, user) -> None:

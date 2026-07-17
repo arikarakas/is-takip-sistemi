@@ -88,8 +88,8 @@ export default function ImportModal({
                                 className={INPUT_CLASS_NAME}
                             />
                             <p className="text-xs text-slate-400 mt-1.5">
-                                Üstte boş satırlar varsa (ör. 4. satır başlıksa) buraya 4 yazın.
-                                Bilmiyorsanız boş bırakın; sistem &quot;Sıra&quot;, &quot;Durum&quot; gibi başlıkları arar.
+                                Üstte boş satırlar varsa (ör. 3. satır başlıksa) buraya 3 yazın.
+                                Bilmiyorsanız boş bırakın; sistem kolon başlıklarını otomatik arar.
                             </p>
                         </div>
                     </div>

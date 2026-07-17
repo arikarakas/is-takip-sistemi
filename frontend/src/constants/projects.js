@@ -31,6 +31,11 @@ export const PROJECT_STATUS_OPTIONS = [
     { value: 'TAMAMLANDI', label: 'Tamamlandı' },
 ];
 
+export const MACHINE_STATUS_OPTIONS = [
+    { value: 'true', label: 'Evet' },
+    { value: 'false', label: 'Hayır' },
+];
+
 export const ACILIYET_DEGERI = {
     'Çok Acil': 4,
     'Acil': 3,

@@ -17,6 +17,11 @@ function collectAssignees(formData) {
     return { assignedUserIds, assignedCustomNames, sorumlular };
 }
 
+function optionalText(formData, field) {
+    const value = trimValue(formData.get(field));
+    return value || null;
+}
+
 function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, sorumlular }) {
     const title = trimValue(formData.get('title'));
     const client = trimValue(formData.get('client'));
@@ -25,24 +30,25 @@ function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, s
     const payload = {
         title,
         client,
-        aksiyon,
+        aksiyon: aksiyon || null,
         sorumlular,
         assigned_user_ids: assignedUserIds,
         assigned_custom_names: assignedCustomNames,
         durum: formData.get('durum') || 'BEKLEMEDE',
         tamamlanma: Number(trimValue(formData.get('tamamlanma')) || 0),
+        talep: optionalText(formData, 'talep'),
+        aciliyet: optionalText(formData, 'aciliyet'),
+        ilgili: optionalText(formData, 'ilgili'),
+        ilgili_email: optionalText(formData, 'ilgili_email'),
+        ilgili_telefon: optionalText(formData, 'ilgili_telefon'),
+        beklenen: optionalText(formData, 'beklenen'),
+        notlar: optionalText(formData, 'notlar'),
+        risk: optionalText(formData, 'risk'),
+        hedef_tarih: optionalText(formData, 'hedef_tarih'),
     };
 
     const oncelik = trimValue(formData.get('oncelik'));
     if (oncelik) payload.oncelik = Number(oncelik);
-
-    for (const field of ['aciliyet', 'ilgili', 'beklenen', 'notlar', 'risk', 'ilgili_email', 'ilgili_telefon']) {
-        const value = trimValue(formData.get(field));
-        if (value) payload[field] = value;
-    }
-
-    const hedefTarih = trimValue(formData.get('hedef_tarih'));
-    if (hedefTarih) payload.hedef_tarih = hedefTarih;
 
     return { title, client, aksiyon, sorumlular, assignedUserIds, assignedCustomNames, payload };
 }

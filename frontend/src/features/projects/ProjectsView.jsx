@@ -110,15 +110,29 @@ export default function ProjectsView({
                         </h1>
                     </div>
                     <div className="flex items-center gap-4 self-start lg:self-auto">
-                        <div className="max-w-md w-60">
+                        <div className="max-w-md w-60 relative">
                             <input
                                 type="text"
                                 placeholder="Proje Ara..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 shadow-xs"
+                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 shadow-xs pr-9"
                             />
+                            {searchTerm && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                                    tabIndex={-1}
+                                    aria-label="Temizle"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                                        <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
+                  
                         <div className="bg-slate-200 p-1 rounded-xl flex gap-1 text-sm font-semibold">
                             <button
                                 onClick={() => setViewMode('table')}

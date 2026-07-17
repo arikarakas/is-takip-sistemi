@@ -50,8 +50,6 @@ export function useRecentChanges(activeView, onNavigateToActivity) {
     }, [activeView]);
 
     useEffect(() => {
-        if (activeView !== 'projects') return undefined;
-
         pollUnreadCount();
         const interval = setInterval(pollUnreadCount, 30_000);
         return () => clearInterval(interval);

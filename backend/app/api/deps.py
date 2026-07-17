@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.core.security.jwt import decode_token
 from app.core.security.rate_limit import make_rate_limiter
 from app.models import User
+from app.services.machine_service import MachineService
 from app.services.project_service import ProjectService
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -96,3 +97,8 @@ async def get_project_service(db: DatabaseDep) -> ProjectService:
 
 
 ProjectServiceDep = Annotated[ProjectService, Depends(get_project_service)]
+
+async def get_machine_service(db: DatabaseDep) -> MachineService:
+    return MachineService(db)
+
+MachineServiceDep = Annotated[MachineService, Depends(get_machine_service)]

@@ -15,3 +15,4 @@ class User(Base):
     activity_last_viewed_at = Column(DateTime(timezone=True), nullable=True)
 
     project_assignments = relationship("ProjectAssignment", back_populates="user")
+    machines = relationship("Machine", back_populates="last_modified_by")

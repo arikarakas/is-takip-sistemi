@@ -21,9 +21,9 @@ function ProjectCard({ project, onClick }) {
                     </span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-800 mt-3 tracking-tight">{project.title}</h3>
-                <p className="text-sm text-slate-500 mt-2 leading-relaxed">{project.notlar}</p>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">{project.aksiyon}</p>
             </div>
-            <div className={`mt-6 pt-4 border-t flex justify-end ${isCompleted ? 'border-emerald-100/80' : 'border-slate-50'}`}>
+            <div className={`mt-6 pt-4 border-t flex justify-end ${isCompleted ? 'border-emerald-200' : 'border-slate-200'}`}>
                 <button className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer">Detayları Yönet →</button>
             </div>
         </div>

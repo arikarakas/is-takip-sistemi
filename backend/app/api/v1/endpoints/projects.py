@@ -102,6 +102,7 @@ async def get_unread_changes_count(service: ProjectServiceDep, current_user: Cur
     count = await service.get_unread_changes_count(
         current_user.activity_last_viewed_at,
         current_user.id,
+        user_role=current_user.role,
     )
     return UnreadChangesCountResponse(count=count)
 
