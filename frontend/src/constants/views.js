@@ -4,6 +4,7 @@ export const VIEWS = {
     ACTIVITY: 'activity',
     USERS: 'users',
     MACHINES: 'machines',
+    APPOINTMENTS: 'appointments',
 };
 
 export const DEFAULT_VIEW = VIEWS.PROJECTS;
@@ -14,6 +15,7 @@ export const VIEW_SLUGS = {
     [VIEWS.ACTIVITY]: 'degisiklikler',
     [VIEWS.USERS]: 'kullanicilar',
     [VIEWS.MACHINES]: 'makineler',
+    [VIEWS.APPOINTMENTS]: 'randevular',
 };
 
 export const SLUG_TO_VIEW = Object.fromEntries(

@@ -25,6 +25,20 @@ export const STATUS_STYLES = {
     TAMAMLANDI: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
+export const STATUS_FILTER_ACTIVE_STYLES = {
+    HEPSİ: 'bg-white text-blue-600 shadow-sm',
+    BEKLEMEDE: 'text-white bg-slate-600 shadow-sm',
+    'DEVAM EDİYOR': 'text-white bg-amber-700 shadow-sm',
+    TAMAMLANDI: 'text-white bg-emerald-700 shadow-sm',
+};
+
+export const STATUS_FILTER_INACTIVE_STYLES = {
+    HEPSİ: 'hover:bg-white/40',
+    BEKLEMEDE: 'hover:text-slate-600 hover:bg-white/40',
+    'DEVAM EDİYOR': 'hover:text-amber-700 hover:bg-white/40',
+    TAMAMLANDI: 'hover:text-emerald-700 hover:bg-white/40',
+};
+
 export const PROJECT_STATUS_OPTIONS = [
     { value: 'BEKLEMEDE', label: 'Beklemede' },
     { value: 'DEVAM EDİYOR', label: 'Devam Ediyor' },

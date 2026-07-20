@@ -10,6 +10,7 @@ from app.models.user import User  # noqa: F401
 from app.models.project_assignments import ProjectAssignment  # noqa: F401
 from app.models.project_changes import ProjectChange  # noqa: F401
 from app.models.machine import Machine
+from app.models.appointment import Appointment
 
 config = context.config
 

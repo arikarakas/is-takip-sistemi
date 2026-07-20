@@ -9,7 +9,7 @@ import SplitText from '../../components/dashboard/SplitText';
 import ShinyText from '../../components/dashboard/ShinyText';
 import { createProjectAction } from './projectActions';
 import { useProjectFilters } from './useProjectFilters';
-import { PROJECT_STATUS_OPTIONS } from '../../constants/projects';
+import { PROJECT_STATUS_OPTIONS, STATUS_FILTER_ACTIVE_STYLES, STATUS_FILTER_INACTIVE_STYLES } from '../../constants/projects';
 
 export default function ProjectsView({
     projects,
@@ -191,8 +191,8 @@ export default function ProjectsView({
                                     onClick={() => setStatusFilter(status)}
                                     className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
                                         isActive
-                                            ? 'bg-white text-blue-600 shadow-sm'
-                                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                                            ? STATUS_FILTER_ACTIVE_STYLES[status]
+                                            : STATUS_FILTER_INACTIVE_STYLES[status]
                                     }`}
                                 >
                                     {status}
