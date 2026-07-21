@@ -26,7 +26,6 @@ async def create_new_appointment(
 @router.get("/", response_model=list[AppointmentResponse])
 async def read_all_appointments(
     service: AppointmentServiceDep,
-    _: AdminUserDep,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
 ):

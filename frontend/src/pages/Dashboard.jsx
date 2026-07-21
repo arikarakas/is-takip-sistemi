@@ -86,7 +86,7 @@ function Dashboard({ currentUser, onLogout }) {
 
     useEffect(() => {
         if (
-            (activeView === VIEWS.USERS || activeView === VIEWS.APPOINTMENTS)
+            (activeView === VIEWS.USERS)
             && currentUser
             && !isAdmin
         ) {
