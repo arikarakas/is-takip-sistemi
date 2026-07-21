@@ -292,6 +292,7 @@ function Dashboard({ currentUser, onLogout }) {
                     editAction={editAction}
                     editState={editState}
                     isEditPending={isEditPending}
+                    currentUser={currentUser}
                 />
             )}
             {showMachineModals && (

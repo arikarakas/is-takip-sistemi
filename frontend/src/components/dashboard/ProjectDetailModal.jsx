@@ -1,6 +1,5 @@
 import { STATUS_STYLES } from '../../constants/projects';
 import { formatDateTR } from '../../utils/date';
-import ProgressBar from './ProgressBar';
 
 const labelClassName = 'text-xs font-bold uppercase tracking-wider text-slate-400';
 
@@ -17,8 +16,12 @@ function DetailField({ label, value, children }) {
     );
 }
 
-function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeleting, deleteError, isAdmin }) {
+function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeleting, deleteError, isAdmin, currentUser }) {
     if (!project) return null;
+
+    const canEdit = isAdmin || (project.assignments || []).some(
+        (assignment) => assignment.assigned_user_id === currentUser?.id,
+    );
 
     return (
         <div
@@ -97,24 +100,28 @@ function ProjectDetailModal({ project, onClose, onEditClick, onDelete, isDeletin
                     {deleteError && (
                         <p className="text-xs text-red-600 mb-3">{deleteError}</p>
                     )}
-                    {isAdmin && (
-                        <div className="flex items-center justify-between gap-3">
-                            <button
-                                type="button"
-                                onClick={() => onDelete(project)}
-                                disabled={isDeleting}
-                                className="px-4 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-xl text-sm font-semibold hover:bg-red-100 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isDeleting ? 'Siliniyor...' : 'Projeyi Sil'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => onEditClick(project)}
-                                disabled={isDeleting}
-                                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
-                            >
-                                Düzenle
-                            </button>
+                    {(canEdit || isAdmin) && (
+                        <div className={`flex items-center gap-3 ${canEdit && isAdmin ? 'justify-between' : 'justify-end'}`}>
+                            {isAdmin && (
+                                <button
+                                    type="button"
+                                    onClick={() => onDelete(project)}
+                                    disabled={isDeleting}
+                                    className="px-4 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-xl text-sm font-semibold hover:bg-red-100 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isDeleting ? 'Siliniyor...' : 'Projeyi Sil'}
+                                </button>
+                            )}
+                            {canEdit && (
+                                <button
+                                    type="button"
+                                    onClick={() => onEditClick(project)}
+                                    disabled={isDeleting}
+                                    className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
+                                >
+                                    Düzenle
+                                </button>
+                            )}
                         </div>
                     )}
                 </footer>
