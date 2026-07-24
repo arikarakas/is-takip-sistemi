@@ -50,6 +50,8 @@ export default function ProjectsView({
         setTimeSliderStep,
         urgencyFilter,
         setUrgencyFilter,
+        showCompleted,
+        setShowCompleted,
         urgencyOptions,
         filteredProjects,
         resetAdvancedFilters,
@@ -214,6 +216,8 @@ export default function ProjectsView({
                         urgencyFilter={urgencyFilter}
                         onUrgencyFilterChange={setUrgencyFilter}
                         urgencyOptions={urgencyOptions}
+                        showCompleted={showCompleted}
+                        onShowCompletedChange={setShowCompleted}
                         onReset={resetAdvancedFilters}
                     />
                     {upcomingAppointments && (

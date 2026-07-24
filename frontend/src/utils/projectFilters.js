@@ -73,6 +73,10 @@ export function matchesUrgencyFilter(aciliyet, filter) {
     return normalize(aciliyet) === normalize(filter);
 }
 
-export function hasAdvancedFiltersActive(isTimeFilterActive, urgencyFilter) {
-    return isTimeFilterActive || urgencyFilter !== 'TÜMÜ';
+export function isCompletedStatus(durum) {
+    return (durum || '').trim().toLocaleUpperCase('tr-TR') === 'TAMAMLANDI';
+}
+
+export function hasAdvancedFiltersActive(isTimeFilterActive, urgencyFilter, showCompleted = true) {
+    return isTimeFilterActive || urgencyFilter !== 'TÜMÜ' || !showCompleted;
 }

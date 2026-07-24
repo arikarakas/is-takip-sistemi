@@ -15,12 +15,14 @@ export default function FilterPanel({
     urgencyFilter,
     onUrgencyFilterChange,
     urgencyOptions,
+    showCompleted,
+    onShowCompletedChange,
     onReset,
 }) {
     const containerRef = useRef(null);
     const activeMode = TIME_FILTER_MODES.find((mode) => mode.step === timeSliderStep) ?? TIME_FILTER_MODES[1];
     const hasUrgencyChoices = (urgencyOptions ?? []).length > 1;
-    const hasActiveFilters = hasAdvancedFiltersActive(isTimeFilterActive, urgencyFilter);
+    const hasActiveFilters = hasAdvancedFiltersActive(isTimeFilterActive, urgencyFilter, showCompleted);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -147,7 +149,7 @@ export default function FilterPanel({
                         </div>
                     </section>
 
-                    <section>
+                    <section className="border-b border-slate-100 pb-4 mb-4">
                         <label htmlFor="urgency-filter" className="block text-lg font-bold text-slate-700 mb-2">
                             Aciliyet Seviyesi
                         </label>
@@ -167,6 +169,33 @@ export default function FilterPanel({
                         {!hasUrgencyChoices && (
                             <p className="mt-1.5 text-[14px] text-slate-400">Tabloda öncelik bilgisi bulunmuyor.</p>
                         )}
+                    </section>
+
+                    <section>
+                        <div className="flex items-center justify-between gap-3">
+                            <label htmlFor="show-completed-toggle" className="text-lg font-bold text-slate-700 cursor-pointer">
+                                Tamamlanmış İşler
+                            </label>
+                            <button
+                                id="show-completed-toggle"
+                                type="button"
+                                role="switch"
+                                aria-checked={showCompleted}
+                                onClick={() => onShowCompletedChange(!showCompleted)}
+                                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                                    showCompleted ? 'bg-blue-600' : 'bg-slate-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                                        showCompleted ? 'translate-x-5' : 'translate-x-0.5'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                        <p className="mt-1.5 text-[14px] text-slate-400">
+                            {showCompleted ? 'Tamamlanan işler listede görünür.' : 'Tamamlanan işler gizleniyor.'}
+                        </p>
                     </section>
                 </div>
             )}
