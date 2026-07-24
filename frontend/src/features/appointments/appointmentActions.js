@@ -14,17 +14,17 @@ function buildAppointmentPayload(formData) {
     const appointmentDate = trimValue(formData.get('appointment_date'));
     const appointmentTime = trimValue(formData.get('appointment_time'));
     const startTime = toLocalDateTime(appointmentDate, appointmentTime);
+    const description = trimValue(formData.get('description'));
+    const clientName = trimValue(formData.get('client_name'));
+    const sorumlular = trimValue(formData.get('sorumlular'));
 
     const payload = {
         title,
         start_time: startTime,
+        description: description || null,
+        client_name: clientName || null,
+        sorumlular: sorumlular || null,
     };
-
-    const description = trimValue(formData.get('description'));
-    if (description) payload.description = description;
-
-    const clientName = trimValue(formData.get('client_name'));
-    if (clientName) payload.client_name = clientName;
 
     return { title, startTime, payload };
 }

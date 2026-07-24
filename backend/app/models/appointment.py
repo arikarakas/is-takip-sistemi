@@ -10,3 +10,4 @@ class Appointment(Base):
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=True)
     client_name = Column(String(150), nullable=True)
+    sorumlular = Column(Text, nullable=True)

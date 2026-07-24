@@ -41,6 +41,11 @@ export function formatDateLongTR(dateKey) {
     return `${day} ${month} ${year}, ${weekday}`;
 }
 
+export function formatDateShortTR(dateKey) {
+    const date = parseDateKey(dateKey);
+    return `${date.getDate()} ${MONTH_NAMES_TR[date.getMonth()].slice(0, 3)}`;
+}
+
 export function getDefaultTimeForDate(dateKey) {
     const todayKey = toDateKey(new Date());
     if (dateKey === todayKey) {
@@ -97,4 +102,25 @@ export function splitStartTime(startTime) {
         date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
         time: `${pad(date.getHours())}:${pad(date.getMinutes())}`,
     };
+}
+
+export function getDaysUntil(startTime) {
+    const today = parseDateKey(toDateKey(new Date()));
+    const target = parseDateKey(toDateKey(startTime));
+    return Math.round((target - today) / (1000 * 60 * 60 * 24));
+}
+
+export function getUpcomingAppointments(appointments, { maxDays = 7, limit = 5 } = {}) {
+    const now = new Date();
+
+    return [...appointments]
+        .filter((appointment) => {
+            const start = new Date(appointment.start_time);
+            if (Number.isNaN(start.getTime())) return false;
+            if (start < now) return false;
+            const days = getDaysUntil(appointment.start_time);
+            return days >= 0 && days <= maxDays;
+        })
+        .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+        .slice(0, limit);
 }

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { INPUT_CLASS_NAME, LABEL_CLASS_NAME } from '../../constants/projects';
 import { formatDateLongTR, getDefaultTimeForDate, splitStartTime } from '../../utils/appointmentCalendar';
+import { TimePicker } from 'react-accessible-time-picker';
 
 function CalendarIcon({ className }) {
     return (
@@ -8,6 +10,19 @@ function CalendarIcon({ className }) {
             <path d="M16 2v4M8 2v4M3 10h18" />
         </svg>
     );
+}
+
+function toTimePickerValue(time) {
+    const [hour = '09', minute = '00'] = String(time || '09:00').split(':');
+    return {
+        hour: hour.padStart(2, '0'),
+        minute: minute.padStart(2, '0'),
+    };
+}
+
+function toTimeString(value) {
+    if (!value?.hour || !value?.minute) return '';
+    return `${String(value.hour).padStart(2, '0')}:${String(value.minute).padStart(2, '0')}`;
 }
 
 export default function AppointmentModal({
@@ -19,12 +34,19 @@ export default function AppointmentModal({
     appointment = null,
     defaultDate = '',
 }) {
-    if (!isOpen) return null;
-
     const isEditMode = !!appointment;
     const fromAppointment = splitStartTime(appointment?.start_time);
     const initialDate = fromAppointment.date || defaultDate || '';
     const initialTime = fromAppointment.time || (defaultDate ? getDefaultTimeForDate(defaultDate) : '09:00');
+    const [timeValue, setTimeValue] = useState(() => toTimePickerValue(initialTime));
+    const appointmentTime = toTimeString(timeValue);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setTimeValue(toTimePickerValue(initialTime));
+    }, [isOpen, initialTime, appointment?.id]);
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -91,18 +113,50 @@ export default function AppointmentModal({
                                     type="date"
                                     required
                                     defaultValue={initialDate}
-                                    className={INPUT_CLASS_NAME}
+                                    className={`${INPUT_CLASS_NAME} h-10`}
                                 />
                             </div>
                             <div>
                                 <label className={LABEL_CLASS_NAME}>Saat *</label>
-                                <input
-                                    name="appointment_time"
-                                    type="time"
-                                    required
-                                    defaultValue={initialTime}
-                                    className={INPUT_CLASS_NAME}
-                                />
+                                <input type="hidden" name="appointment_time" value={appointmentTime} />
+                                <div
+                                    className={`${INPUT_CLASS_NAME} flex h-10 items-center py-0! focus-within:border-blue-500 focus-within:bg-white`}
+                                    style={{
+                                        '--time-bg': 'transparent',
+                                        '--time-border': 'transparent',
+                                        '--time-focus-border': 'transparent',
+                                        '--time-text': '#0f172a',
+                                        '--time-separator': '#94a3b8',
+                                        '--time-icon': '#64748b',
+                                        '--time-hover': '#f1f5f9',
+                                        '--time-focus': '#f1f5f9',
+                                        '--time-active': '#dbeafe',
+                                        '--time-icon': '#000000',
+                                    }}
+                                >
+                                    <TimePicker
+                                        is24Hour
+                                        minuteStep={15}
+                                        required
+                                        value={timeValue}
+                                        onChange={setTimeValue}
+                                        hourPlaceholder="--"
+                                        minutePlaceholder="--"
+                                        popoverColumnHourTitle="Saat"
+                                        popoverColumnMinuteTitle="Dakika"
+                                        classes={{
+                                            container: 'flex h-full w-full gap-0',
+                                            timePicker:
+                                                '!flex !h-full !w-full !items-center !border-0 !bg-transparent !p-0 !rounded-none !shadow-none',
+                                            timeInputs: '!h-full !items-center',
+                                            timeInput: '!h-auto !text-sm !leading-none !py-0',
+                                            separator: '!text-sm !leading-none !font-normal !px-0.5',
+                                            timeTrigger: '!size-4 !shrink-0 !p-0 [&_svg]:size-3.5',
+                                            popoverContent: '!z-[100]',
+                                            selectContent: '!z-[100]',
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -112,6 +166,17 @@ export default function AppointmentModal({
                                 name="client_name"
                                 type="text"
                                 defaultValue={appointment?.client_name || ''}
+                                placeholder="Opsiyonel"
+                                className={INPUT_CLASS_NAME}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={LABEL_CLASS_NAME}>Sorumlu Kişi(ler)</label>
+                            <input
+                                name="sorumlular"
+                                type="text"
+                                defaultValue={appointment?.sorumlular || ''}
                                 placeholder="Opsiyonel"
                                 className={INPUT_CLASS_NAME}
                             />

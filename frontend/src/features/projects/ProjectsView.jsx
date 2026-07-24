@@ -5,6 +5,7 @@ import ProjectCards from '../../components/dashboard/ProjectCards';
 import ProjectModal from '../../components/dashboard/ProjectModal';
 import ImportModal from '../../components/dashboard/ImportModal';
 import FilterPanel from '../../components/dashboard/FilterPanel';
+import UpcomingAppointments from '../../components/dashboard/UpcomingAppointments';
 import SplitText from '../../components/dashboard/SplitText';
 import ShinyText from '../../components/dashboard/ShinyText';
 import { createProjectAction } from './projectActions';
@@ -25,6 +26,7 @@ export default function ProjectsView({
     onOpenSidebar,
     unreadChangesCount,
     onNavigateToActivity,
+    upcomingAppointments,
 }) {
     const [viewMode, setViewMode] = useState('table');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -214,6 +216,9 @@ export default function ProjectsView({
                         urgencyOptions={urgencyOptions}
                         onReset={resetAdvancedFilters}
                     />
+                    {upcomingAppointments && (
+                        <UpcomingAppointments {...upcomingAppointments} />
+                    )}
                     {unreadChangesCount > 0 && (
                         <button
                             type="button"

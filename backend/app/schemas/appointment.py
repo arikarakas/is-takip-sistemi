@@ -16,6 +16,7 @@ class AppointmentBase(BaseModel):
     start_time: datetime = Field(..., description="Randevu tarihi.")
     end_time: Optional[datetime] = Field(None, description="Randevu bitiş tarihi.")
     client_name: Optional[str] = Field(None, description="Randevu kiminle")
+    sorumlular: Optional[str] = Field(None, description="Randevudan sorumlular.")
 
     @field_validator("start_time", "end_time", mode="after")
     @classmethod
@@ -31,6 +32,7 @@ class AppointmentUpdate(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     client_name: Optional[str] = None
+    sorumlular: Optional[str] = None
 
     @field_validator("start_time", "end_time", mode="after")
     @classmethod

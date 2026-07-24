@@ -3,9 +3,8 @@ import {
     fetchAppointments,
     deleteAppointment as deleteAppointmentApi,
 } from './appointmentApi';
-import { VIEWS } from '../../constants/views';
 
-export function useAppointments(activeView) {
+export function useAppointments() {
     const [appointments, setAppointments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,10 +27,13 @@ export function useAppointments(activeView) {
     }, [loadAppointments]);
 
     useEffect(() => {
-        if (activeView === VIEWS.APPOINTMENTS) {
-            loadAppointments();
-        }
-    }, [activeView, loadAppointments]);
+        loadAppointments();
+    }, [loadAppointments]);
+
+    useEffect(() => {
+        const interval = setInterval(loadAppointments, 60_000);
+        return () => clearInterval(interval);
+    }, [loadAppointments]);
 
     const removeAppointmentFromLists = useCallback((appointmentId) => {
         setAppointments((prev) => prev.filter((a) => a.id !== appointmentId));

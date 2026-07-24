@@ -14,7 +14,7 @@ import { updateMachineAction } from '../features/machines/machineActions';
 import { useAppointments } from '../features/appointments/useAppointments';
 import { updateAppointmentAction } from '../features/appointments/appointmentActions';
 import { useDashboardView } from '../hooks/useDashboardView';
-import { VIEWS } from '../constants/views';
+import { VIEWS, shouldShowUpcomingAppointments } from '../constants/views';
 import MachinesView from '../features/machines/MachinesView';
 import MachineModals from '../features/machines/MachineModals';
 import AppointmentsView from '../features/appointments/AppointmentsView';
@@ -62,7 +62,7 @@ function Dashboard({ currentUser, onLogout }) {
         error: appointmentsError,
         loadAppointments,
         handleDeleteAppointment,
-    } = useAppointments(activeView);
+    } = useAppointments();
 
     const { sortKey, sortDirection, handleSort, applySort } = useProjectSort();
 
@@ -186,7 +186,15 @@ function Dashboard({ currentUser, onLogout }) {
 
     const showProjectModals = activeView === VIEWS.PROJECTS || activeView === VIEWS.ASSIGNED;
     const showMachineModals = activeView === VIEWS.MACHINES;
-    const showAppointmentModals = activeView === VIEWS.APPOINTMENTS;
+    const showAppointmentModals = !!selectedAppointment || !!editingAppointment;
+
+    const upcomingAppointmentsProps = shouldShowUpcomingAppointments(activeView)
+        ? {
+            appointments,
+            isLoading: isAppointmentsLoading,
+            onAppointmentClick: setSelectedAppointment,
+        }
+        : null;
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
@@ -246,6 +254,7 @@ function Dashboard({ currentUser, onLogout }) {
                         onOpenSidebar={() => setIsSidebarOpen(true)}
                         unreadChangesCount={unreadChangesCount}
                         onNavigateToActivity={navigateToActivity}
+                        upcomingAppointments={upcomingAppointmentsProps}
                     />
                 )}
                 {activeView === VIEWS.MACHINES && (
@@ -267,6 +276,7 @@ function Dashboard({ currentUser, onLogout }) {
                         onReload={loadAppointments}
                         onOpenSidebar={() => setIsSidebarOpen(true)}
                         onAppointmentClick={setSelectedAppointment}
+                        upcomingAppointments={upcomingAppointmentsProps}
                     />
                 )}
             </main>

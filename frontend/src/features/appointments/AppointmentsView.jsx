@@ -2,6 +2,7 @@ import { useState, useEffect, useActionState, useRef } from 'react';
 import { MenuIcon } from '../../components/dashboard/Sidebar';
 import AppointmentCalendar from '../../components/dashboard/AppointmentCalendar';
 import AppointmentModal from '../../components/dashboard/AppointmentModal';
+import UpcomingAppointments from '../../components/dashboard/UpcomingAppointments';
 import SplitText from '../../components/dashboard/SplitText';
 import { createAppointmentAction } from './appointmentActions';
 import { formatMonthYearTR } from '../../utils/appointmentCalendar';
@@ -29,6 +30,7 @@ export default function AppointmentsView({
     onReload,
     onOpenSidebar,
     onAppointmentClick,
+    upcomingAppointments,
 }) {
     const today = new Date();
     const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -153,6 +155,10 @@ export default function AppointmentsView({
                     </button>
                 </div>
             </header>
+
+            {upcomingAppointments && (
+                <UpcomingAppointments {...upcomingAppointments} />
+            )}
 
             {isLoading && (
                 <div className="text-center p-12 text-slate-500 rounded-2xl bg-white border border-slate-100">
