@@ -103,6 +103,17 @@ export function isContractFullyInvoiced(contract) {
     return Math.round(invoiced * 100) === Math.round(totalAmount * 100);
 }
 
+export function isZeroAmountContract(contract) {
+    const totalAmount = Number(contract?.total_amount);
+    return !Number.isNaN(totalAmount) && totalAmount === 0;
+}
+
+export function getZeroAmountMonthCellClass({ interactive = false } = {}) {
+    return interactive
+        ? 'bg-purple-600 text-white font-semibold hover:bg-purple-500'
+        : 'bg-purple-600 text-white font-semibold';
+}
+
 export function isContractPartiallyInvoiced(contract) {
     const totalAmount = Number(contract?.total_amount);
     if (Number.isNaN(totalAmount) || totalAmount <= 0) return false;
