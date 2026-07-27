@@ -6,8 +6,10 @@ import {
     formatCurrencyTR,
     getInvoiceForMonth,
     getInvoiceStatusCellClass,
+    getZeroAmountMonthCellClass,
     hasInvoiceData,
     isContractFullyInvoiced,
+    isZeroAmountContract,
     sumInvoiceAmounts,
 } from '../../constants/maintenanceContracts';
 
@@ -118,6 +120,7 @@ function MaintenanceContractTable({
                         {contracts.map((contract, index) => {
                             const isEven = index % 2 === 0;
                             const isFullyInvoiced = isContractFullyInvoiced(contract);
+                            const isZeroAmount = isZeroAmountContract(contract);
                             return (
                                 <tr
                                     key={contract.id}
@@ -174,9 +177,11 @@ function MaintenanceContractTable({
                                         const invoice = getInvoiceForMonth(contract.invoices, m.month);
                                         const filled = hasInvoiceData(invoice);
                                         const amountLabel = formatCurrencyTR(invoice?.amount);
-                                        const statusClass = getInvoiceStatusCellClass(invoice?.status, {
-                                            interactive: canEdit,
-                                        });
+                                        const statusClass = isZeroAmount
+                                            ? getZeroAmountMonthCellClass({ interactive: canEdit })
+                                            : getInvoiceStatusCellClass(invoice?.status, {
+                                                interactive: canEdit,
+                                            });
 
                                         return (
                                             <td
