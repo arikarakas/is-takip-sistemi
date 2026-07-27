@@ -148,6 +148,26 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                             </span>
                         </button>
                         <button
+                                type="button"
+                                onClick={() => onNavigate?.('appointments')}
+                                title="Randevular"
+                                className={`w-full flex items-center gap-3 py-2.5 rounded-xl font-medium transition-all cursor-pointer ${
+                                    isOpen ? 'px-4' : 'md:px-0 md:justify-center md:w-full'
+                                } ${
+                                    activeView === 'appointments'
+                                        ? 'bg-slate-800 text-white'
+                                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                                }`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <path d="M16 2v4M8 2v4M3 10h18" />
+                                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+                                </svg>
+                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
+                                    Randevular
+                                </span>
+                        </button>
+                        <button
                             type="button"
                             onClick={() => onNavigate?.('machines')}
                             title="Bakım Yerleri Makineleri"

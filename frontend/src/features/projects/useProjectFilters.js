@@ -1,5 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { matchesTimeFilter, matchesUrgencyFilter, getUrgencyFilterOptions } from '../../utils/projectFilters';
+import {
+    matchesTimeFilter,
+    matchesUrgencyFilter,
+    getUrgencyFilterOptions,
+    isCompletedStatus,
+} from '../../utils/projectFilters';
 import { sortProjects } from '../../utils/projectSort';
 
 export function useProjectFilters(projects) {
@@ -9,6 +14,7 @@ export function useProjectFilters(projects) {
     const [isTimeFilterActive, setIsTimeFilterActive] = useState(false);
     const [timeSliderStep, setTimeSliderStep] = useState(2);
     const [urgencyFilter, setUrgencyFilter] = useState('TÜMÜ');
+    const [showCompleted, setShowCompleted] = useState(true);
 
     const urgencyOptions = useMemo(() => getUrgencyFilterOptions(projects), [projects]);
 
@@ -37,17 +43,19 @@ export function useProjectFilters(projects) {
             );
 
             if (!matchesSearch) return false;
+            if (!showCompleted && isCompletedStatus(project.durum)) return false;
             if (isTimeFilterActive && !matchesTimeFilter(project.hedef_tarih, timeSliderStep)) return false;
             if (!matchesUrgencyFilter(project.aciliyet, urgencyFilter)) return false;
 
             return true;
         });
-    }, [projects, statusFilter, searchTerm, isTimeFilterActive, timeSliderStep, urgencyFilter]);
+    }, [projects, statusFilter, searchTerm, showCompleted, isTimeFilterActive, timeSliderStep, urgencyFilter]);
 
     function resetAdvancedFilters() {
         setIsTimeFilterActive(false);
         setTimeSliderStep(2);
         setUrgencyFilter('TÜMÜ');
+        setShowCompleted(true);
     }
 
     return {
@@ -63,6 +71,8 @@ export function useProjectFilters(projects) {
         setTimeSliderStep,
         urgencyFilter,
         setUrgencyFilter,
+        showCompleted,
+        setShowCompleted,
         urgencyOptions,
         filteredProjects,
         resetAdvancedFilters,

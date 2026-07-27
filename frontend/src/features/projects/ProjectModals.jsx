@@ -14,6 +14,7 @@ export default function ProjectModals({
     editAction,
     editState,
     isEditPending,
+    currentUser,
 }) {
     return (
         <>
@@ -25,6 +26,7 @@ export default function ProjectModals({
                 isDeleting={isDeleting}
                 deleteError={deleteError}
                 isAdmin={isAdmin}
+                currentUser={currentUser}
             />
             <ProjectModal
                 key={editingProject ? `edit-${editingProject.id}` : 'edit-none'}

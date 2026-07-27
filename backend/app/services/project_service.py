@@ -103,8 +103,19 @@ class ProjectService:
         """Giriş yapan kullanıcıya atanan projeleri getirir."""
         return await self.repo.get_assigned_to_user(user_id=user_id, skip=skip, limit=limit)
     
-    async def update_project(self, project_id, data: ProjectUpdate, user_id: int):
+    def _user_can_edit_project(self, project: Project, user_id: int, user_role: str) -> bool:
+        if user_role == "admin":
+            return True
+        return any(assignment.assigned_user_id == user_id for assignment in project.assignments)
+
+    async def update_project(self, project_id, data: ProjectUpdate, user_id: int, user_role: str):
         project = await self.get_project_by_id(project_id)
+        if not self._user_can_edit_project(project, user_id, user_role):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Bu projeyi düzenleme yetkiniz yok.",
+            )
+
         update_data = data.model_dump(exclude_unset=True)
 
         user_ids = update_data.pop("assigned_user_ids", None)
@@ -135,8 +146,14 @@ class ProjectService:
         await self.change_repo.create(project_id=project_id, user_id=user_id, action=ProjectActions.UPDATED, changes=changes or None)
         return await self.get_project_by_id(project_id)
     
-    async def delete_project(self, project_id: int) -> None:
+    async def delete_project(self, project_id: int, user_role: str) -> None:
         """Projeyi sistemden siler."""
+        if user_role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Bu işlem için yönetici yetkisi gerekli.",
+            )
+
         project = await self.get_project_by_id(project_id)
         await self.repo.delete(project)
 

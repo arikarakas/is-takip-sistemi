@@ -12,6 +12,7 @@ from app.core.security.rate_limit import make_rate_limiter
 from app.models import User
 from app.services.machine_service import MachineService
 from app.services.project_service import ProjectService
+from app.services.appointment_service import AppointmentService
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/login",
@@ -102,3 +103,8 @@ async def get_machine_service(db: DatabaseDep) -> MachineService:
     return MachineService(db)
 
 MachineServiceDep = Annotated[MachineService, Depends(get_machine_service)]
+
+async def get_appointment_service(db: DatabaseDep) -> AppointmentService:
+    return AppointmentService(db)
+
+AppointmentServiceDep = Annotated[AppointmentService, Depends(get_appointment_service)]

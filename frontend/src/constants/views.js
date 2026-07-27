@@ -4,9 +4,19 @@ export const VIEWS = {
     ACTIVITY: 'activity',
     USERS: 'users',
     MACHINES: 'machines',
+    APPOINTMENTS: 'appointments',
 };
 
 export const DEFAULT_VIEW = VIEWS.PROJECTS;
+
+/** Yaklaşan randevular widget'ının gösterileceği view'lar */
+export const UPCOMING_APPOINTMENTS_VIEWS = [
+    VIEWS.PROJECTS,
+];
+
+export function shouldShowUpcomingAppointments(view) {
+    return UPCOMING_APPOINTMENTS_VIEWS.includes(view);
+}
 
 export const VIEW_SLUGS = {
     [VIEWS.PROJECTS]: 'projeler',
@@ -14,6 +24,7 @@ export const VIEW_SLUGS = {
     [VIEWS.ACTIVITY]: 'degisiklikler',
     [VIEWS.USERS]: 'kullanicilar',
     [VIEWS.MACHINES]: 'makineler',
+    [VIEWS.APPOINTMENTS]: 'randevular',
 };
 
 export const SLUG_TO_VIEW = Object.fromEntries(

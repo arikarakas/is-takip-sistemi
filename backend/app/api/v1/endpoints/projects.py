@@ -133,14 +133,19 @@ async def update_existing_project(
     current_user: CurrentUserDep,
 ):
     """Mevcut bir projeyi günceller."""
-    return await service.update_project(project_id, data, user_id=current_user.id)
+    return await service.update_project(
+        project_id,
+        data,
+        user_id=current_user.id,
+        user_role=current_user.role,
+    )
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_existing_project(
     project_id: int,
     service: ProjectServiceDep,
-    current_user_id: CurrentUserDep,
+    current_user: CurrentUserDep,
 ):
     """Bir projeyi sistemden tamamen siler."""
-    await service.delete_project(project_id)
+    await service.delete_project(project_id, user_role=current_user.role)
     return None
