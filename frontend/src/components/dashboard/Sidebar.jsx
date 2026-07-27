@@ -189,6 +189,27 @@ function Sidebar({ onLogout, isOpen, onToggle, currentUser, activeView, onNaviga
                                 Makineler
                             </span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => onNavigate?.('maintenanceContracts')}
+                            title="Bakım Anlaşmaları"
+                            className={`w-full flex items-center gap-3 py-2.5 rounded-xl font-medium transition-all cursor-pointer ${
+                                isOpen ? 'px-4' : 'md:px-0 md:justify-center md:w-full'
+                            } ${
+                                activeView === 'maintenanceContracts'
+                                    ? 'bg-slate-800 text-white'
+                                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                            }`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M3 9h18M9 21V9" />
+                                <path d="M13 13h4M13 17h4" />
+                            </svg>
+                            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden md:hidden'}`}>
+                                Bakım Anlaşmaları
+                            </span>
+                        </button>
 
                         {isAdmin && (
                             <button

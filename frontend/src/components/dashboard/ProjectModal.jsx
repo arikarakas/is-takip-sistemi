@@ -29,7 +29,13 @@ function ProjectModal({ isOpen, onClose, formAction, formState, isPending, proje
                         </div>
                     )}
 
-                    <form action={formAction} className="space-y-4">
+                    <form
+                        className="space-y-4"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            formAction(new FormData(event.currentTarget));
+                        }}
+                    >
                         {isEditMode && <input type="hidden" name="projectId" value={project.id} />}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

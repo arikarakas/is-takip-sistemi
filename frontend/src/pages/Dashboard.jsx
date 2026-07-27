@@ -13,12 +13,16 @@ import { useMachines } from '../features/machines/useMachines';
 import { updateMachineAction } from '../features/machines/machineActions';
 import { useAppointments } from '../features/appointments/useAppointments';
 import { updateAppointmentAction } from '../features/appointments/appointmentActions';
+import { useMaintenanceContracts } from '../features/maintenanceContracts/useMaintenanceContracts';
+import { updateMaintenanceContractAction } from '../features/maintenanceContracts/maintenanceContractActions';
 import { useDashboardView } from '../hooks/useDashboardView';
 import { VIEWS, shouldShowUpcomingAppointments } from '../constants/views';
 import MachinesView from '../features/machines/MachinesView';
 import MachineModals from '../features/machines/MachineModals';
 import AppointmentsView from '../features/appointments/AppointmentsView';
 import AppointmentModals from '../features/appointments/AppointmentModals';
+import MaintenanceContractsView from '../features/maintenanceContracts/MaintenanceContractsView';
+import MaintenanceContractModals from '../features/maintenanceContracts/MaintenanceContractModals';
 
 function Dashboard({ currentUser, onLogout }) {
     const { activeView, navigateToView } = useDashboardView();
@@ -29,6 +33,7 @@ function Dashboard({ currentUser, onLogout }) {
     const [editingProject, setEditingProject] = useState(null);
     const [editingMachine, setEditingMachine] = useState(null);
     const [editingAppointment, setEditingAppointment] = useState(null);
+    const [editingContract, setEditingContract] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState(null);
 
@@ -64,6 +69,16 @@ function Dashboard({ currentUser, onLogout }) {
         handleDeleteAppointment,
     } = useAppointments();
 
+    const {
+        contracts,
+        year: contractsYear,
+        isLoading: isContractsLoading,
+        error: contractsError,
+        loadContracts,
+        handleYearChange: handleContractsYearChange,
+        handleDeleteContract,
+    } = useMaintenanceContracts(activeView);
+
     const { sortKey, sortDirection, handleSort, applySort } = useProjectSort();
 
     const [editState, editAction, isEditPending] = useActionState(updateProjectAction, { success: false, error: null });
@@ -74,6 +89,9 @@ function Dashboard({ currentUser, onLogout }) {
 
     const [appointmentEditState, appointmentEditAction, isAppointmentEditPending] = useActionState(updateAppointmentAction, { success: false, error: null });
     const wasAppointmentEditPendingRef = useRef(false);
+
+    const [contractEditState, contractEditAction, isContractEditPending] = useActionState(updateMaintenanceContractAction, { success: false, error: null });
+    const wasContractEditPendingRef = useRef(false);
 
     const navigateToActivity = useCallback(() => navigateToView(VIEWS.ACTIVITY), [navigateToView]);
 
@@ -123,6 +141,16 @@ function Dashboard({ currentUser, onLogout }) {
             setEditingAppointment(null);
         }
     }, [appointmentEditState?.success, editingAppointment, isAppointmentEditPending, loadAppointments]);
+
+    useEffect(() => {
+        const wasPending = wasContractEditPendingRef.current;
+        wasContractEditPendingRef.current = isContractEditPending;
+
+        if (wasPending && !isContractEditPending && contractEditState?.success && editingContract) {
+            loadContracts();
+            setEditingContract(null);
+        }
+    }, [contractEditState?.success, editingContract, isContractEditPending, loadContracts]);
 
     async function onDeleteProject(project) {
         const confirmed = window.confirm(
@@ -184,9 +212,30 @@ function Dashboard({ currentUser, onLogout }) {
         setIsDeleting(false);
     }
 
+    async function onDeleteContract(contract) {
+        const confirmed = window.confirm(
+            `"${contract.company_name}" sözleşmesini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+        );
+        if (!confirmed) return;
+
+        setIsDeleting(true);
+        setDeleteError(null);
+
+        const result = await handleDeleteContract(contract);
+
+        if (result.success) {
+            setEditingContract(null);
+        } else if (result.error) {
+            setDeleteError(result.error);
+        }
+
+        setIsDeleting(false);
+    }
+
     const showProjectModals = activeView === VIEWS.PROJECTS || activeView === VIEWS.ASSIGNED;
     const showMachineModals = activeView === VIEWS.MACHINES;
     const showAppointmentModals = !!selectedAppointment || !!editingAppointment;
+    const showContractModals = activeView === VIEWS.MAINTENANCE_CONTRACTS && !!editingContract;
 
     const upcomingAppointmentsProps = shouldShowUpcomingAppointments(activeView)
         ? {
@@ -279,6 +328,22 @@ function Dashboard({ currentUser, onLogout }) {
                         upcomingAppointments={upcomingAppointmentsProps}
                     />
                 )}
+                {activeView === VIEWS.MAINTENANCE_CONTRACTS && (
+                    <MaintenanceContractsView
+                        contracts={contracts}
+                        year={contractsYear}
+                        isLoading={isContractsLoading}
+                        error={contractsError}
+                        onYearChange={handleContractsYearChange}
+                        onReload={loadContracts}
+                        onEditContract={(contract) => {
+                            setDeleteError(null);
+                            setEditingContract(contract);
+                        }}
+                        onOpenSidebar={() => setIsSidebarOpen(true)}
+                        isAdmin={isAdmin}
+                    />
+                )}
             </main>
 
             {showProjectModals && (
@@ -348,6 +413,21 @@ function Dashboard({ currentUser, onLogout }) {
                     editAction={appointmentEditAction}
                     editState={appointmentEditState}
                     isEditPending={isAppointmentEditPending}
+                />
+            )}
+            {showContractModals && (
+                <MaintenanceContractModals
+                    editingContract={editingContract}
+                    onCloseEdit={() => {
+                        setEditingContract(null);
+                        setDeleteError(null);
+                    }}
+                    editAction={contractEditAction}
+                    editState={contractEditState}
+                    isEditPending={isContractEditPending}
+                    onDelete={onDeleteContract}
+                    isDeleting={isDeleting}
+                    deleteError={deleteError}
                 />
             )}
         </div>
