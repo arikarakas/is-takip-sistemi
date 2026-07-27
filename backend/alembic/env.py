@@ -11,6 +11,8 @@ from app.models.project_assignments import ProjectAssignment  # noqa: F401
 from app.models.project_changes import ProjectChange  # noqa: F401
 from app.models.machine import Machine
 from app.models.appointment import Appointment
+from app.models.maintenance_contract import MaintenanceContract  # noqa: F401
+from app.models.monthly_invoice import MonthlyInvoice  # noqa: F401
 
 config = context.config
 

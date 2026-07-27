@@ -13,6 +13,7 @@ from app.models import User
 from app.services.machine_service import MachineService
 from app.services.project_service import ProjectService
 from app.services.appointment_service import AppointmentService
+from app.services.maintenance_contract_service import MaintenanceContractService
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/login",
@@ -108,3 +109,13 @@ async def get_appointment_service(db: DatabaseDep) -> AppointmentService:
     return AppointmentService(db)
 
 AppointmentServiceDep = Annotated[AppointmentService, Depends(get_appointment_service)]
+
+
+async def get_maintenance_contract_service(db: DatabaseDep) -> MaintenanceContractService:
+    return MaintenanceContractService(db)
+
+
+MaintenanceContractServiceDep = Annotated[
+    MaintenanceContractService,
+    Depends(get_maintenance_contract_service),
+]

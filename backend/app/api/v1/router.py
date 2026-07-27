@@ -1,6 +1,13 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, projects, users, machines, appointments
+from app.api.v1.endpoints import (
+    auth,
+    projects,
+    users,
+    machines,
+    appointments,
+    maintenance_contracts,
+)
 
 api_router = APIRouter()
 
@@ -9,3 +16,8 @@ api_router.include_router(projects.router, prefix="/projects", tags=["projects"]
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(machines.router, prefix="/machines", tags=["machines"])
 api_router.include_router(appointments.router, prefix="/appointments", tags=["appointments"])
+api_router.include_router(
+    maintenance_contracts.router,
+    prefix="/maintenance-contracts",
+    tags=["maintenance-contracts"],
+)
