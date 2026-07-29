@@ -22,7 +22,7 @@ function optionalText(formData, field) {
     return value || null;
 }
 
-function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, sorumlular }) {
+function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, sorumlular }, mode = 'create') {
     const title = trimValue(formData.get('title'));
     const client = trimValue(formData.get('client'));
     const aksiyon = trimValue(formData.get('aksiyon'));
@@ -35,7 +35,6 @@ function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, s
         assigned_user_ids: assignedUserIds,
         assigned_custom_names: assignedCustomNames,
         durum: formData.get('durum') || 'BEKLEMEDE',
-        tamamlanma: Number(trimValue(formData.get('tamamlanma')) || 0),
         talep: optionalText(formData, 'talep'),
         aciliyet: optionalText(formData, 'aciliyet'),
         ilgili: optionalText(formData, 'ilgili'),
@@ -43,9 +42,16 @@ function buildProjectPayload(formData, { assignedUserIds, assignedCustomNames, s
         ilgili_telefon: optionalText(formData, 'ilgili_telefon'),
         beklenen: optionalText(formData, 'beklenen'),
         notlar: optionalText(formData, 'notlar'),
-        risk: optionalText(formData, 'risk'),
         hedef_tarih: optionalText(formData, 'hedef_tarih'),
     };
+
+    if (mode === 'create' || formData.has('tamamlanma')) {
+        payload.tamamlanma = Number(trimValue(formData.get('tamamlanma')) || 0);
+    }
+
+    if (mode === 'create' || formData.has('risk')) {
+        payload.risk = optionalText(formData, 'risk');
+    }
 
     const oncelik = trimValue(formData.get('oncelik'));
     if (oncelik) payload.oncelik = Number(oncelik);
@@ -82,7 +88,7 @@ export async function createProjectAction(_prevState, formData) {
 export async function updateProjectAction(_prevState, formData) {
     const projectId = formData.get('projectId');
     const assignees = collectAssignees(formData);
-    const fields = buildProjectPayload(formData, assignees);
+    const fields = buildProjectPayload(formData, assignees, 'update');
     const validationError = validateProjectFields(fields);
 
     if (validationError) {
