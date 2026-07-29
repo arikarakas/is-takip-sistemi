@@ -48,6 +48,45 @@ def _build_changes(project, update_data: dict) -> dict:
             changes[field] = {"old": old_serialized, "new": new_serialized}
     return changes
 
+def _resolve_assignments(
+    project: Project,
+    user_ids: list[int] | None,
+    custom_names: list[str] | None,
+) -> tuple[list[int], list[str]]:
+    resolved_user_ids = sorted(
+        user_ids if user_ids is not None else [
+            a.assigned_user_id for a in project.assignments if a.assigned_user_id
+        ]
+    )
+    resolved_custom_names = sorted(
+        name.strip()
+        for name in (
+            custom_names if custom_names is not None else [
+                a.assigned_custom_name for a in project.assignments if a.assigned_custom_name
+            ]
+        )
+        if name and str(name).strip()
+    )
+    return resolved_user_ids, resolved_custom_names
+
+def _build_assignment_changes(
+    project: Project,
+    user_ids: list[int] | None,
+    custom_names: list[str] | None,
+) -> dict:
+    if user_ids is None and custom_names is None:
+        return {}
+
+    old_user_ids, old_custom_names = _resolve_assignments(project, None, None)
+    new_user_ids, new_custom_names = _resolve_assignments(project, user_ids, custom_names)
+
+    changes = {}
+    if old_user_ids != new_user_ids:
+        changes["assigned_user_ids"] = {"old": old_user_ids, "new": new_user_ids}
+    if old_custom_names != new_custom_names:
+        changes["assigned_custom_names"] = {"old": old_custom_names, "new": new_custom_names}
+    return changes
+
 def tamamlanma_tarihi(durum: ProjectStatus):
     """Proje tamamlandı durumuna getirilirse o günü tarihini döndürür."""
     if durum == ProjectStatus.TAMAMLANDI:
@@ -122,28 +161,33 @@ class ProjectService:
         custom_names = update_data.pop("assigned_custom_names", None)
 
         new_durum = update_data.get("durum", project.durum)
-        if "durum" in update_data:
+        if "durum" in update_data and new_durum != project.durum:
             update_data["tamamlanma_tarih"] = tamamlanma_tarihi(new_durum)
 
         changes = _build_changes(project, update_data)
+        changes.update(_build_assignment_changes(project, user_ids, custom_names))
+
+        if not changes:
+            return project
+
         project.last_modified_by_id = user_id
 
         for field, value in update_data.items():
             setattr(project, field, value)
-        
+
         if user_ids is not None or custom_names is not None:
-            _apply_assignments(
-                project,
-                user_ids if user_ids is not None else [
-                    a.assigned_user_id for a in project.assignments if a.assigned_user_id
-                ],
-                custom_names if custom_names is not None else [
-                    a.assigned_custom_name for a in project.assignments if a.assigned_custom_name
-                ],
+            resolved_user_ids, resolved_custom_names = _resolve_assignments(
+                project, user_ids, custom_names
             )
+            _apply_assignments(project, resolved_user_ids, resolved_custom_names)
 
         await self.repo.session.flush()
-        await self.change_repo.create(project_id=project_id, user_id=user_id, action=ProjectActions.UPDATED, changes=changes or None)
+        await self.change_repo.create(
+            project_id=project_id,
+            user_id=user_id,
+            action=ProjectActions.UPDATED,
+            changes=changes,
+        )
         return await self.get_project_by_id(project_id)
     
     async def delete_project(self, project_id: int, user_role: str) -> None:
