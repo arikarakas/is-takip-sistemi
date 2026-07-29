@@ -341,7 +341,6 @@ function Dashboard({ currentUser, onLogout }) {
                             setEditingContract(contract);
                         }}
                         onOpenSidebar={() => setIsSidebarOpen(true)}
-                        isAdmin={isAdmin}
                     />
                 )}
             </main>
