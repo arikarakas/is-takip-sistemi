@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Query, status
 
 from app.api.deps import (
-    AdminUserDep,
     CurrentUserDep,
     MaintenanceContractServiceDep,
 )
@@ -30,7 +29,7 @@ async def read_all_maintenance_contracts(
 async def create_maintenance_contract(
     data: MaintenanceContractCreate,
     service: MaintenanceContractServiceDep,
-    _: AdminUserDep,
+    _: CurrentUserDep,
 ):
     """Sisteme yeni bir bakım anlaşması / firma ekler."""
     return await service.create_contract(data)
@@ -41,7 +40,7 @@ async def update_maintenance_contract(
     contract_id: int,
     data: MaintenanceContractUpdate,
     service: MaintenanceContractServiceDep,
-    _: AdminUserDep,
+    _: CurrentUserDep,
 ):
     """Mevcut bir bakım anlaşmasının detaylarını günceller."""
     return await service.update_contract(contract_id=contract_id, data=data)
@@ -56,7 +55,7 @@ async def upsert_monthly_invoice(
     contract_id: int,
     data: MonthlyInvoiceUpsert,
     service: MaintenanceContractServiceDep,
-    _: AdminUserDep,
+    _: CurrentUserDep,
 ):
     """Belirli bir ayın fatura/bakım hücresini ekler veya günceller."""
     return await service.upsert_monthly_invoice(contract_id=contract_id, data=data)
@@ -66,7 +65,7 @@ async def upsert_monthly_invoice(
 async def delete_maintenance_contract(
     contract_id: int,
     service: MaintenanceContractServiceDep,
-    _: AdminUserDep,
+    _: CurrentUserDep,
 ):
     """Bir bakım anlaşmasını sistemden tamamen siler."""
     await service.delete_contract(contract_id=contract_id)

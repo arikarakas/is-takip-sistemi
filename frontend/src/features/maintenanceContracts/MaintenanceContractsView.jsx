@@ -27,7 +27,6 @@ export default function MaintenanceContractsView({
     onReload,
     onEditContract,
     onOpenSidebar,
-    isAdmin,
 }) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [invoiceContext, setInvoiceContext] = useState(null);
@@ -167,15 +166,13 @@ export default function MaintenanceContractsView({
                             </select>
                         </label>
 
-                        {isAdmin && (
-                            <button
-                                type="button"
-                                onClick={() => setIsCreateOpen(true)}
-                                className="rounded-xl bg-blue-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-blue-700 shadow-sm transition cursor-pointer"
-                            >
-                                + Yeni Firma / Sözleşme
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            onClick={() => setIsCreateOpen(true)}
+                            className="rounded-xl bg-blue-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-blue-700 shadow-sm transition cursor-pointer"
+                        >
+                            + Yeni Firma / Sözleşme
+                        </button>
                     </div>
                 </div>
 
@@ -226,9 +223,7 @@ export default function MaintenanceContractsView({
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
                     <p className="text-slate-600 font-semibold mb-1">Henüz sözleşme yok</p>
                     <p className="text-sm text-slate-400">
-                        {isAdmin
-                            ? 'Yeni firma ekleyerek tabloyu oluşturmaya başlayın.'
-                            : 'Bu yıl için kayıtlı bakım anlaşması bulunamadı.'}
+                        Yeni firma ekleyerek tabloyu oluşturmaya başlayın.
                     </p>
                 </div>
             ) : filteredContracts.length === 0 ? (
@@ -250,9 +245,9 @@ export default function MaintenanceContractsView({
                 <MaintenanceContractTable
                     contracts={filteredContracts}
                     year={year}
-                    canEdit={isAdmin}
-                    onCompanyClick={isAdmin ? onEditContract : undefined}
-                    onMonthCellClick={isAdmin ? handleMonthCellClick : undefined}
+                    canEdit
+                    onCompanyClick={onEditContract}
+                    onMonthCellClick={handleMonthCellClick}
                     onMonthHeaderClick={handleMonthHeaderClick}
                 />
             )}
@@ -263,8 +258,8 @@ export default function MaintenanceContractsView({
                 contracts={filteredContracts}
                 year={year}
                 month={monthlySummaryMonth}
-                canEdit={isAdmin}
-                onEntryClick={isAdmin ? handleMonthlyEntryClick : undefined}
+                canEdit
+                onEntryClick={handleMonthlyEntryClick}
             />
 
             <ContractModal
