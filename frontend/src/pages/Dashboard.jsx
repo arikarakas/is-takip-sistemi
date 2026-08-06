@@ -48,6 +48,7 @@ function Dashboard({ currentUser, onLogout }) {
         assignedError,
         loadProjects,
         reloadAll,
+        refreshQuietly,
         handleDeleteProject,
         handleImport,
     } = useProjects(activeView);
@@ -95,12 +96,39 @@ function Dashboard({ currentUser, onLogout }) {
 
     const navigateToActivity = useCallback(() => navigateToView(VIEWS.ACTIVITY), [navigateToView]);
 
+    const [isProjectsViewBlocking, setIsProjectsViewBlocking] = useState(false);
+    const pendingRemoteReloadRef = useRef(false);
+
+    const isProjectModalBlocking = Boolean(
+        selectedProject || editingProject || isProjectsViewBlocking,
+    );
+
+    const flushRemoteReload = useCallback(() => {
+        if (isProjectModalBlocking) {
+            pendingRemoteReloadRef.current = true;
+            return;
+        }
+        pendingRemoteReloadRef.current = false;
+        refreshQuietly();
+    }, [isProjectModalBlocking, refreshQuietly]);
+
+    const handleRemoteChanges = useCallback(() => {
+        flushRemoteReload();
+    }, [flushRemoteReload]);
+
     const {
         recentChanges,
         changesLoading,
         changesError,
         unreadChangesCount,
-    } = useRecentChanges(activeView, navigateToActivity);
+    } = useRecentChanges(activeView, navigateToActivity, handleRemoteChanges);
+
+    useEffect(() => {
+        if (!isProjectModalBlocking && pendingRemoteReloadRef.current) {
+            pendingRemoteReloadRef.current = false;
+            refreshQuietly();
+        }
+    }, [isProjectModalBlocking, refreshQuietly]);
 
     useEffect(() => {
         if (
@@ -304,6 +332,7 @@ function Dashboard({ currentUser, onLogout }) {
                         unreadChangesCount={unreadChangesCount}
                         onNavigateToActivity={navigateToActivity}
                         upcomingAppointments={upcomingAppointmentsProps}
+                        onBlockingUiChange={setIsProjectsViewBlocking}
                     />
                 )}
                 {activeView === VIEWS.MACHINES && (

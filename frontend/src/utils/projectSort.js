@@ -1,8 +1,15 @@
 import { ACILIYET_DEGERI } from '../constants/projects';
 
+function compareByGuncelSira(a, b) {
+    const siraA = a.guncel_sira ?? a.sira ?? Infinity;
+    const siraB = b.guncel_sira ?? b.sira ?? Infinity;
+    return siraA - siraB;
+}
+
 export function sortProjects(list, sortKey, sortDirection) {
     return [...list].sort((a, b) => {
-        if (!sortKey) return 0;
+        // Varsayılan sıra API ile aynı: guncel_sira (reload sonrası da sabit kalır)
+        if (!sortKey) return compareByGuncelSira(a, b);
 
         let valA = a[sortKey];
         let valB = b[sortKey];
@@ -27,10 +34,6 @@ export function sortProjects(list, sortKey, sortDirection) {
         }
 
         if (result !== 0) return result;
-        if (sortKey === 'aciliyet') return 0;
-
-        const siraA = a.sira ?? Infinity;
-        const siraB = b.sira ?? Infinity;
-        return siraA - siraB;
+        return compareByGuncelSira(a, b);
     });
 }

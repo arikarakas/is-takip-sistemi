@@ -27,6 +27,7 @@ export default function ProjectsView({
     unreadChangesCount,
     onNavigateToActivity,
     upcomingAppointments,
+    onBlockingUiChange,
 }) {
     const [viewMode, setViewMode] = useState('table');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +59,11 @@ export default function ProjectsView({
     } = useProjectFilters(projects);
 
     const sortedProjects = applySort(filteredProjects);
+
+    useEffect(() => {
+        onBlockingUiChange?.(isModalOpen || isImportOpen);
+        return () => onBlockingUiChange?.(false);
+    }, [isModalOpen, isImportOpen, onBlockingUiChange]);
 
     useEffect(() => {
         const wasPending = wasCreatePendingRef.current;
