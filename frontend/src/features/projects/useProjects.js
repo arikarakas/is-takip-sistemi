@@ -45,6 +45,22 @@ export function useProjects(activeView) {
         await Promise.all([loadProjects(), loadAssignedProjects()]);
     }, [loadProjects, loadAssignedProjects]);
 
+    /** Arka plan yenileme: loading bayrağı yok, hata olursa mevcut liste korunur. */
+    const refreshQuietly = useCallback(async () => {
+        try {
+            const [all, assigned] = await Promise.all([
+                fetchProjects(),
+                fetchAssignedProjects(),
+            ]);
+            setProjects(all);
+            setAssignedProjects(assigned);
+            setError(null);
+            setAssignedError(null);
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
+
     useEffect(() => {
         if (activeView === 'projects') {
             loadProjects();
@@ -85,6 +101,7 @@ export function useProjects(activeView) {
         loadProjects,
         loadAssignedProjects,
         reloadAll,
+        refreshQuietly,
         handleDeleteProject,
         handleImport,
     };

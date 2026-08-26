@@ -6,13 +6,18 @@ import {
     markChangesViewed,
 } from './changesApi';
 
-export function useRecentChanges(activeView, onNavigateToActivity) {
+export function useRecentChanges(activeView, onNavigateToActivity, onRemoteChanges) {
     const [recentChanges, setRecentChanges] = useState([]);
     const [changesLoading, setChangesLoading] = useState(false);
     const [changesError, setChangesError] = useState(null);
     const [unreadChangesCount, setUnreadChangesCount] = useState(0);
     const previousUnreadCountRef = useRef(null);
     const isUnreadNotificationReadyRef = useRef(false);
+    const onRemoteChangesRef = useRef(onRemoteChanges);
+
+    useEffect(() => {
+        onRemoteChangesRef.current = onRemoteChanges;
+    }, [onRemoteChanges]);
 
     const { triggerNotification } = useNotification();
 
@@ -75,6 +80,8 @@ export function useRecentChanges(activeView, onNavigateToActivity) {
                 tag: 'project-changes',
                 onClickAction: onNavigateToActivity,
             });
+
+            onRemoteChangesRef.current?.();
         }
 
         previousUnreadCountRef.current = unreadChangesCount;
