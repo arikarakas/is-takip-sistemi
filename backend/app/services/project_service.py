@@ -38,6 +38,25 @@ def _serialize_change_value(value):
         return value.isoformat()
     return value
 
+def _project_title_from_change(row) -> str | None:
+    """Proje silinmiş olsa bile değişiklik kaydından başlık çıkarır."""
+    if row.project is not None:
+        return row.project.title
+
+    if not isinstance(row.changes, dict):
+        return None
+
+    title = row.changes.get("title")
+    if isinstance(title, str):
+        return title
+    # Güncelleme kayıtlarında title {"old": ..., "new": ...} formatındadır
+    if isinstance(title, dict):
+        for key in ("new", "old"):
+            value = title.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+    return None
+
 def _build_changes(project, update_data: dict) -> dict:
     changes = {}
     for field, new_value in update_data.items():
@@ -246,18 +265,14 @@ class ProjectService:
         result = []
 
         for row in rows:
-            project_title = row.project.title if row.project else None
-            if project_title is None and row.changes:
-                project_title = row.changes.get("title")
-            
             result.append(ProjectChangeResponse(
                 id=row.id,
                 project_id=row.project_id,
                 action=row.action.value if hasattr(row.action, "value") else row.action,
                 changed_at=row.changed_at,
-                changes=row.changes,
+                changes=row.changes if isinstance(row.changes, dict) else None,
                 user=row.user,
-                project_title=project_title
+                project_title=_project_title_from_change(row),
             ))
         return result
 
