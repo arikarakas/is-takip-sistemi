@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, status
 from app.api.deps import (
     AdminUserDep,
     AppointmentServiceDep,
+    CurrentUserDep,
 )
 from app.schemas.appointment import (
     AppointmentCreate,
@@ -26,10 +27,11 @@ async def create_new_appointment(
 @router.get("/", response_model=list[AppointmentResponse])
 async def read_all_appointments(
     service: AppointmentServiceDep,
+    _: CurrentUserDep,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
 ):
-    """Tüm randevularu sıralı ve sayfalandırılmış olarak listeler."""
+    """Oturum açmış kullanıcılar için randevuları sıralı ve sayfalandırılmış listeler."""
     return await service.get_all_appointments(skip=skip, limit=limit)
 
 @router.get("/{appoint_id}", response_model=AppointmentResponse)

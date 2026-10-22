@@ -47,3 +47,4 @@ backups
 *.dump
 *.sql
 .cursor
+AGENTS.md
