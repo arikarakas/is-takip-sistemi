@@ -54,15 +54,15 @@ class ProjectUpdate(BaseModel):
     sira: Optional[int] = None
     guncel_sira: Optional[int] = None
     oncelik: Optional[int] = None
-    aciliyet: Optional[str] = None
-    title: Optional[str] = None
-    client: Optional[str] = None
-    aksiyon: Optional[str] = None
-    talep: Optional[str] = None
-    sorumlular: Optional[str] = None
-    ilgili: Optional[str] = None
-    ilgili_email: Optional[str] = None
-    ilgili_telefon: Optional[str] = None
+    aciliyet: Optional[str] = Field(None, max_length=30)
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    client: Optional[str] = Field(None, min_length=1, max_length=200)
+    aksiyon: Optional[str] = Field(None, min_length=1)
+    talep: Optional[str] = Field(None, min_length=1)
+    sorumlular: Optional[str] = Field(None, min_length=1)
+    ilgili: Optional[str] = Field(None, max_length=150)
+    ilgili_email: Optional[str] = Field(None, max_length=100)
+    ilgili_telefon: Optional[str] = Field(None, max_length=100)
     hedef_tarih: Optional[date] = None
     tamamlanma_tarih: Optional[date] = None
     durum: Optional[ProjectStatus] = None
@@ -72,6 +72,14 @@ class ProjectUpdate(BaseModel):
     tamamlanma: Optional[int] = None
     assigned_user_ids: Optional[List[int]] = None
     assigned_custom_names: Optional[List[str]] = None
+
+    @field_validator("sira", "guncel_sira", "title", "client", "sorumlular", "durum", "tamamlanma")
+    @classmethod
+    def validate_non_nullable_fields(cls, value):
+        # Gönderilmeyen alanlar korunur; açıkça gönderilen null değerler reddedilir.
+        if value is None:
+            raise ValueError("Bu alan null olamaz.")
+        return value
 
     @field_validator("tamamlanma")
     @classmethod

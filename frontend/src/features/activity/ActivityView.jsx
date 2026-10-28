@@ -1,7 +1,11 @@
 import SplitText from '../../components/dashboard/SplitText';
 import RecentChangesTable from '../../components/dashboard/RecentChangesTable';
 
-export default function ActivityView({ changes, isLoading, error }) {
+export default function ActivityView({ changes, isLoading, error, onNavigateToProject }) {
+    function handleRowClick(item) {
+        if (item.project_id == null) return;
+        onNavigateToProject?.(item.project_id);
+    }
     return (
         <>
             <header className="mb-8">
@@ -26,6 +30,7 @@ export default function ActivityView({ changes, isLoading, error }) {
                 changes={changes}
                 isLoading={isLoading}
                 error={error}
+                onRowClick={onNavigateToProject ? handleRowClick : undefined}
             />
         </>
     );

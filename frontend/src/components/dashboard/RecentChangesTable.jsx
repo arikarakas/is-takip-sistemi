@@ -1,5 +1,3 @@
-import { formatDateTR } from '../../utils/date';
-
 const ACTION_LABELS = {
     created: 'Oluşturuldu',
     updated: 'Güncellendi',
@@ -32,7 +30,7 @@ function formatChangeSummary(changes) {
         .join(', ') || '—';
 }
 
-export default function RecentChangesTable({ changes, isLoading, error }) {
+export default function RecentChangesTable({ changes, isLoading, error, onRowClick }) {
     if (isLoading) {
         return <p className="text-slate-500">Yükleniyor...</p>;
     }
@@ -60,7 +58,19 @@ export default function RecentChangesTable({ changes, isLoading, error }) {
                     </thead>
                     <tbody>
                         {changes.map((item) => (
-                            <tr key={item.id} className="border-t border-slate-100">
+                            <tr
+                                key={item.id}
+                                onClick={
+                                    item.project_id != null && onRowClick
+                                        ? () => onRowClick(item)
+                                        : undefined
+                                }
+                                className={`border-t border-slate-100 ${
+                                    item.project_id != null && onRowClick
+                                        ? 'cursor-pointer hover:bg-slate-50'
+                                        : ''
+                                }`}
+                            >
                                 <td className="px-5 py-3 whitespace-nowrap text-slate-600">
                                     {formatDateTime(item.changed_at)}
                                 </td>
@@ -71,7 +81,18 @@ export default function RecentChangesTable({ changes, isLoading, error }) {
                                     {ACTION_LABELS[item.action] || item.action}
                                 </td>
                                 <td className="px-5 py-3">
-                                    {item.project_title || '—'}
+                                    {item.project_id != null && onRowClick ? (
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onRowClick(item);
+                                            }}
+                                            className="cursor-pointer text-left hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+                                        >
+                                            {item.project_title || 'Projeye git'}
+                                        </button>
+                                    ) : item.project_title || '—'}
                                 </td>
                                 <td className="px-5 py-3 text-slate-500">
                                     {formatChangeSummary(item.changes)}

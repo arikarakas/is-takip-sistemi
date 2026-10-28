@@ -1,8 +1,7 @@
 export const PROJECT_TABLE_COLUMNS = [
-    { key: 'sira', label: 'SIRA', width: 84 },
+    { key: 'title', label: 'PROJE ADI', width: 280 },
     { key: 'aciliyet', label: 'ACİLİYET', width: 108 },
     { key: 'durum', label: 'DURUM', width: 164 },
-    { key: 'title', label: 'PROJE ADI', width: 220 },
     { key: 'client', label: 'MÜŞTERİ ADI', width: 156 },
     { key: 'aksiyon', label: 'YAPILACAK İŞ', width: 400 },
     { key: 'talep', label: 'MÜŞTERİ TALEBİ', width: 400},
@@ -17,7 +16,7 @@ export const PROJECT_TABLE_COLUMNS = [
 
 export const PROJECT_TABLE_WIDTH = PROJECT_TABLE_COLUMNS.reduce((sum, col) => sum + col.width, 0);
 
-export const STICKY_COLUMN_OFFSETS = { sira: 0, title: 84 };
+export const STICKY_COLUMN_OFFSETS = { title: 0 };
 
 export const STATUS_STYLES = {
     BEKLEMEDE: 'bg-slate-100 text-slate-600 border-slate-200',

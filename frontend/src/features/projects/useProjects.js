@@ -15,6 +15,7 @@ export function useProjects(activeView) {
     const [assignedError, setAssignedError] = useState(null);
 
     const loadProjects = useCallback(async () => {
+        setIsLoading(true);
         try {
             const data = await fetchProjects();
             setProjects(data);

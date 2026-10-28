@@ -10,6 +10,11 @@ import enum
 from app.models.project_changes import ProjectActions
 from app.repositories.project_change_repo import ProjectChangeRepository
 from app.schemas.project_change import ProjectChangeResponse
+import io
+import math
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 ASSIGNMENT_FIELDS = {"assigned_user_ids", "assigned_custom_names"}
 
@@ -295,3 +300,91 @@ class ProjectService:
     async def mark_changes_viewed(self, user) -> None:
         user.activity_last_viewed_at = datetime.now(timezone.utc)
         await self.repo.session.flush()
+
+    def _generate_projects_excel(self, projects: list[Project]) -> io.BytesIO:
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Projeler"
+
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+        header_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        data_font = Font(name="Calibri", size=10)
+        data_align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+        thin_border = Border(left=Side(style="thin", color="D1D5DB"), right=Side(style="thin", color="D1D5DB"),
+                             top=Side(style="thin", color="D1D5DB"), bottom=Side(style="thin", color="D1D5DB"))
+        headers = [
+            ("Proje Adı", 30),
+            ("Aciliyet", 14),
+            ("Durum", 16),
+            ("Müşteri Adı", 24),
+            ("Yapılacak İş", 40),
+            ("Müşteri Talebi", 35),
+            ("Sorumlular", 24),
+            ("İlgili Kişi", 20),
+            ("İlgili Kişi Telefon", 18),
+            ("İlgili Kişi E-posta", 24),
+            ("Hedef Tarih", 14),
+            ("Tamamlanma Tarihi", 18),
+            ("Hedef", 25),
+            ("Notlar", 35),
+        ]
+
+        for col_idx, (header_text, col_width) in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header_text)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_align
+            cell.border = thin_border
+            col_letter = get_column_letter(col_idx)
+            ws.column_dimensions[col_letter].width = col_width
+
+        ws.row_dimensions[1].height = 28
+
+        for row_idx, p in enumerate(projects, 2):
+            durum_str = p.durum.value if hasattr(p.durum, "value") else str(p.durum)
+            row_data = [
+                p.title,
+                p.aciliyet,
+                durum_str,
+                p.client,
+                p.aksiyon,
+                p.talep,
+                p.sorumlular,
+                p.ilgili,
+                p.ilgili_telefon,
+                p.ilgili_email,
+                p.hedef_tarih,
+                p.tamamlanma_tarih,
+                p.beklenen,
+                p.notlar,
+            ]
+
+            max_lines = 1
+            for col_idx, val in enumerate(row_data, 1):
+                cell = ws.cell(row=row_idx, column=col_idx, value=val)
+                if isinstance(val, str):
+                    cell.data_type = "s"
+                    width = max(1, headers[col_idx - 1][1] - 2)
+                    lines = sum(max(1, math.ceil(len(line) / width)) for line in val.split("\n"))
+                    max_lines = max(max_lines, lines)
+                elif isinstance(val, date):
+                    cell.number_format = "dd.mm.yyyy"
+                cell.font = data_font
+                cell.border = thin_border
+                cell.alignment = data_align_left
+
+            ws.row_dimensions[row_idx].height = min(409, max(22, max_lines * 15))
+
+        ws.freeze_panes = "A2"
+        ws.auto_filter.ref = ws.dimensions
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        return output
+
+    async def export_projects_to_excel(self) -> io.BytesIO:
+        from fastapi.concurrency import run_in_threadpool
+        projects = await self.repo.get_all_for_export()
+        return await run_in_threadpool(self._generate_projects_excel, projects)

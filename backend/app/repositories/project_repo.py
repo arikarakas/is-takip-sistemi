@@ -33,6 +33,12 @@ class ProjectRepository(BaseRepository[Project]):
         )
         return list(result.scalars().all())
     
+    async def get_all_for_export(self):
+        result = await self.session.execute(
+            select(Project).order_by(Project.guncel_sira, Project.id)
+        )
+        return list(result.scalars().all())
+
     async def get_by_status(self, status: ProjectStatus, skip: int=0, limit: int=100):
         result = await self.session.execute(
             select(Project)

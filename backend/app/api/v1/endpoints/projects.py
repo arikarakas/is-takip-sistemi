@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Query, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 from app.api.deps import (
     ProjectServiceDep,
     CurrentUserDep,
@@ -11,6 +12,9 @@ from app.models.project import ProjectStatus, Project
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectImportResponse
 from app.services.project_import import ImportParseError, parse_import_file
 from app.schemas.project_change import ProjectChangeResponse, UnreadChangesCountResponse
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from urllib.parse import quote
 
 router = APIRouter()
 
@@ -90,6 +94,20 @@ async def import_projects_from_file(
         )
 
     return await service.import_projects(rows, detected_header_row, errors)
+
+@router.get("/export/excel")
+async def export_projects_excel(service: ProjectServiceDep, current_user: CurrentUserDep,):
+    """Tüm projeleri formatlı Excel dosyası olarak indirir"""
+    excel_stream = await service.export_projects_to_excel()
+    timestamp = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%Y%m%d_%H%M")
+    filename = f"Sungurlar_Projeler_{timestamp}.xlsx"
+    encoded_filename = quote(filename)
+
+    return StreamingResponse(excel_stream, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={
+                                 "Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}",
+                                 "Cache-Control": "no-store",
+                             },)
 
 @router.get("/changes/recent", response_model=list[ProjectChangeResponse])
 async def read_recent_project_changes(service: ProjectServiceDep, current_user: CurrentUserDep, limit: int = Query(30, ge=1, le=100)):

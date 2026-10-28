@@ -76,7 +76,6 @@ function MachineDetailModal({ machine, onClose, onEditClick, onDelete, isDeletin
                     {deleteError && (
                         <p className="text-xs text-red-600 mb-3">{deleteError}</p>
                     )}
-                    {isAdmin && (
                         <div className="flex items-center justify-between gap-3">
                             <button
                                 type="button"
@@ -95,7 +94,6 @@ function MachineDetailModal({ machine, onClose, onEditClick, onDelete, isDeletin
                                 Düzenle
                             </button>
                         </div>
-                    )}
                 </footer>
             </div>
         </div>

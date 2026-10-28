@@ -36,6 +36,14 @@ function Dashboard({ currentUser, onLogout }) {
     const [editingContract, setEditingContract] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState(null);
+    const [highlightedProjectId, setHighlightedProjectId] = useState(null);
+    const [previousView, setPreviousView] = useState(activeView);
+
+    // Görünüm değişince eski bir yönlendirme isteği yeniden çalışmamalı.
+    if (previousView !== activeView) {
+        setPreviousView(activeView);
+        if (activeView !== VIEWS.PROJECTS) setHighlightedProjectId(null);
+    }
 
     const isAdmin = currentUser?.role === 'admin';
 
@@ -122,6 +130,16 @@ function Dashboard({ currentUser, onLogout }) {
         changesError,
         unreadChangesCount,
     } = useRecentChanges(activeView, navigateToActivity, handleRemoteChanges);
+
+    const handleNavigateToProject = useCallback((projectId) => {
+        if (projectId == null) return;
+        setHighlightedProjectId(projectId);
+        navigateToView(VIEWS.PROJECTS);
+    }, [navigateToView]);
+
+    const handleHighlightComplete = useCallback((projectId) => {
+        setHighlightedProjectId((current) => current === projectId ? null : current);
+    }, []);
 
     useEffect(() => {
         if (!isProjectModalBlocking && pendingRemoteReloadRef.current) {
@@ -301,6 +319,7 @@ function Dashboard({ currentUser, onLogout }) {
                         changes={recentChanges}
                         isLoading={changesLoading}
                         error={changesError}
+                        onNavigateToProject={handleNavigateToProject}
                     />
                 )}
                 {activeView === VIEWS.ASSIGNED && (
@@ -333,6 +352,8 @@ function Dashboard({ currentUser, onLogout }) {
                         onNavigateToActivity={navigateToActivity}
                         upcomingAppointments={upcomingAppointmentsProps}
                         onBlockingUiChange={setIsProjectsViewBlocking}
+                        highlightedProjectId={highlightedProjectId}
+                        onHighlightComplete={handleHighlightComplete}
                     />
                 )}
                 {activeView === VIEWS.MACHINES && (

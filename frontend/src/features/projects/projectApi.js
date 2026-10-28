@@ -100,3 +100,40 @@ export async function importProjects(formData) {
 
     return response.json();
 }
+
+export async function downloadProjectsExcel() {
+    const response = await apiFetch(`${API_BASE}/export/excel`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        cache: 'no-store',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(parseApiError(errorData.detail, 'Excel dosyası indirilirken bir hata oluştu.'));
+    }
+
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const encodedFilename = disposition.match(/filename\*=utf-8''([^;]+)/i)?.[1];
+    let filename = 'Sungurlar_Projeler.xlsx';
+    if (encodedFilename) {
+        try {
+            filename = decodeURIComponent(encodedFilename);
+        } catch {
+            // Geçersiz dosya adı başlığında varsayılan adı kullan.
+        }
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    try {
+        link.href = downloadUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+    } finally {
+        link.remove();
+        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
+    }
+}
